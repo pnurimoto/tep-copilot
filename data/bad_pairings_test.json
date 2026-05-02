@@ -3,8 +3,7 @@
     "description": "Deliberately bad control structure for testing verifier",
     "issues": [
       "XMV(10) used twice (violates MV uniqueness)",
-      "Missing reactor level control (violates inventory loops)",
-      "Missing production rate control (violates mass balance closure)"
+      "Missing reactor level control (violates inventory loops and mass balance closure)"
     ]
   },
   "pairings": [

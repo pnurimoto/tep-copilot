@@ -115,7 +115,7 @@
       "mass_balance_closure": {
         "status": "pass",
         "violations": [],
-        "message": "Mass balance closure satisfied"
+        "message": "Mass balance closure satisfied (all inventory loops present)"
       }
     },
     "overall_status": "pass"
@@ -233,7 +233,7 @@
       "mass_balance_closure": {
         "status": "pass",
         "violations": [],
-        "message": "Mass balance closure satisfied"
+        "message": "Mass balance closure satisfied (all inventory loops present)"
       }
     },
     "overall_status": "fail"

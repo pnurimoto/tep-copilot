@@ -25,7 +25,7 @@ def test_bad_pairings():
     print("\nExpected failures:")
     print("  1. MV uniqueness (XMV(10) used twice)")
     print("  2. Inventory loops (missing reactor level XMEAS(8))")
-    print("  3. Mass balance closure (missing production rate XMEAS(17))")
+    print("  3. Mass balance closure (missing reactor level XMEAS(8))")
     
     # Verify
     results = verify_control_structure(bad_pairings)

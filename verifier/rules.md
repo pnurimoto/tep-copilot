@@ -44,14 +44,14 @@ XMV(11) → XMEAS(8)  (Condenser cooling → Reactor level)
 XMV(7) → XMEAS(12)  (Separator pot flow → Separator level)
 XMV(8) → XMEAS(15)  (Product flow → Stripper level)
 ```
-All three critical levels are controlled.
+All three critical levels are controlled. Note: XMV(11) → XMEAS(8) is the Ricker baseline pairing, which uses condenser cooling to indirectly control reactor level by affecting vapor carryover rate.
 
 **Fail example:**
 ```
-XMV(11) → XMEAS(8)  (Condenser cooling → Reactor level)
+XMV(10) → XMEAS(9)  (Reactor cooling → Reactor temperature)
 XMV(7) → XMEAS(12)  (Separator pot flow → Separator level)
 ```
-Missing stripper level control - stripper could overflow or run dry.
+Missing reactor level and stripper level control - vessels could overflow or run dry.
 
 **If wrong, symptom is:** Vessel overflow causing safety trips and environmental hazards, or vessel running dry causing pump cavitation, loss of seal, equipment damage, and potential safety incidents. Process becomes unstable and unsafe.
 
@@ -81,38 +81,31 @@ Mathematically impossible - at least one CV cannot be controlled.
 
 ## Rule 4: Mass Balance Closure
 
-**Principle:** For overall mass balance, production rate and all inventory loops must be controlled.
+**Principle:** All inventory (level) loops must be controlled for mass balance closure.
 
-**Why it matters:** Material must not accumulate or deplete anywhere in the process. This requires:
-1. Production rate control (XMEAS(17) - stripper product flow)
-2. All inventory (level) controls
-
-Without this, the process will slowly drift over time.
+**Why it matters:** Material must not accumulate or deplete in vessels. All liquid inventories must be controlled to prevent overflow or running dry. Production rate control is recommended but can be managed indirectly through composition cascades (as in Ricker's baseline).
 
 **Required for TEP:**
-- **XMEAS(17)** - Production rate (stripper underflow)
 - **XMEAS(8)** - Reactor level
 - **XMEAS(12)** - Separator level
 - **XMEAS(15)** - Stripper level
 
 **Pass example:**
 ```
-XMV(8) → XMEAS(17)  (Product flow → Production rate)
 XMV(11) → XMEAS(8)  (Condenser cooling → Reactor level)
 XMV(7) → XMEAS(12)  (Separator pot flow → Separator level)
 XMV(8) → XMEAS(15)  (Product flow → Stripper level)
 ```
-Production rate and all levels controlled - mass balance closed.
+All inventory loops controlled - mass balance closed.
 
 **Fail example:**
 ```
-XMV(11) → XMEAS(8)  (Condenser cooling → Reactor level)
+XMV(10) → XMEAS(9)  (Reactor cooling → Reactor temperature)
 XMV(7) → XMEAS(12)  (Separator pot flow → Separator level)
-XMV(8) → XMEAS(15)  (Product flow → Stripper level)
 ```
-Missing production rate control - material will accumulate or deplete.
+Missing reactor level and stripper level control - material will accumulate or deplete.
 
-**If wrong, symptom is:** Process slowly drifts over time with material accumulating in uncontrolled vessels or production rate varying uncontrollably. Inventory levels trend up or down, eventually hitting constraints. Long-term instability and inability to maintain steady state operation.
+**If wrong, symptom is:** Process slowly drifts over time with material accumulating in uncontrolled vessels. Vessels may overflow causing safety trips, or run dry causing pump cavitation. Long-term instability and inability to maintain steady state operation.
 
 ---
 

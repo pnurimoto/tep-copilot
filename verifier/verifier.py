@@ -128,15 +128,16 @@ def check_degrees_of_freedom(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def check_mass_balance_closure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Check that production rate and all inventory loops are controlled.
+    Check that all inventory loops are controlled.
     
-    Rule: For overall mass balance closure, we need production rate control
-    plus all inventory (level) controls. This ensures material doesn't
-    accumulate or deplete anywhere in the process.
+    Rule: For overall mass balance closure, all inventory (level) controls
+    must be present. This ensures material doesn't accumulate or deplete
+    in vessels. Production rate control is recommended but not strictly
+    required as it can be managed indirectly through composition cascades.
     
     If wrong, symptom is: Process slowly drifts over time with material
-    accumulating in uncontrolled vessels or production rate varying
-    uncontrollably. Long-term instability and inability to maintain steady state.
+    accumulating in uncontrolled vessels. Vessels may overflow or run dry.
+    Long-term instability and inability to maintain steady state.
     
     Args:
         pairings: List of pairing dictionaries with 'mv' and 'cv' keys
@@ -146,20 +147,14 @@ def check_mass_balance_closure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]
     """
     controlled_cvs = {p['cv'] for p in pairings}
     
-    # Check for production rate control (XMEAS(17) is stripper product flow)
-    has_production = 'XMEAS(17)' in controlled_cvs
-    
-    # Check for all inventory loops
+    # Check for all inventory loops (production rate is optional)
     required_levels = {
         'XMEAS(8)': 'Reactor level',
-        'XMEAS(12)': 'Separator level', 
+        'XMEAS(12)': 'Separator level',
         'XMEAS(15)': 'Stripper level'
     }
     
     missing = []
-    if not has_production:
-        missing.append('XMEAS(17) (Production rate)')
-    
     for level_cv, description in required_levels.items():
         if level_cv not in controlled_cvs:
             missing.append(f"{level_cv} ({description})")
@@ -168,13 +163,13 @@ def check_mass_balance_closure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]
         return {
             'status': 'fail',
             'violations': missing,
-            'message': f"Mass balance not closed: missing {len(missing)} critical loop(s)"
+            'message': f"Mass balance not closed: missing {len(missing)} inventory loop(s)"
         }
     
     return {
         'status': 'pass',
         'violations': [],
-        'message': 'Mass balance closure satisfied'
+        'message': 'Mass balance closure satisfied (all inventory loops present)'
     }
 
 
