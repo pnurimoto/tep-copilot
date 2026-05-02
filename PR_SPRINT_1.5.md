@@ -42,7 +42,8 @@ Generated verification report comparing agent and Ricker baseline:
 - This reflects the cascade control structure in Ricker's paper where:
   - Loop 8 (production rate) and Loop 9 (stripper level) both use XMV(8)
   - Loop 11 (reactor level) and Loop 17 (separator temp) both use XMV(11)
-- Other checks pass (inventory loops, degrees of freedom, mass balance)
+- All other checks pass: inventory loops ✓, degrees of freedom ✓, mass balance ✓
+- **Note:** Ricker's baseline is a valid cascade control structure; MV uniqueness only applies to pure decentralized control
 
 ### 4. Test Suite
 Created `tests/test_verifier.py` and `data/bad_pairings_test.json` to verify the verifier catches obvious mistakes:
@@ -53,13 +54,13 @@ Created `tests/test_verifier.py` and `data/bad_pairings_test.json` to verify the
 
 ## Key Findings
 
-1. **Agent outperforms Ricker on MV uniqueness**: The agent-proposed structure uses each MV exactly once, while Ricker's baseline has cascade loops that violate strict MV uniqueness.
+1. **Agent uses pure decentralized control**: The agent-proposed structure uses each MV exactly once, following strict decentralized control principles.
 
-2. **Cascade vs. Decentralized**: The Ricker baseline failure highlights the difference between:
-   - Pure decentralized control (one MV per loop)
-   - Cascade control (inner/outer loops sharing MVs)
+2. **Ricker uses cascade control**: The baseline has cascade loops (production rate cascaded with stripper level, reactor level cascaded with separator temperature). This is a valid control strategy but violates strict MV uniqueness.
+
+3. **Rule 4 corrected**: Mass balance closure now only requires inventory loops, not production rate control. Production rate can be managed indirectly through composition cascades (as Ricker does).
    
-3. **Verifier is working correctly**: Successfully identifies violations with clear, actionable messages.
+4. **Verifier is working correctly**: Successfully identifies violations with clear, actionable messages. Ricker baseline now passes all checks except MV uniqueness (expected for cascade control).
 
 ## Engineering Review Checklist
 
