@@ -147,7 +147,14 @@ The choice of manipulated-controlled variable pairings considers:
 ## Sprint 1.4: Proposer Prompt Design
 
 ### Overview
-The proposer prompt is designed to elicit a complete plant-wide control structure from a capable LLM (Claude Sonnet 4). The prompt provides comprehensive context about the TEP process, available variables, control objectives, and engineering constraints to guide the LLM toward defensible control pairings.
+The proposer prompt is designed to elicit a complete plant-wide control structure from a capable LLM. The prompt provides comprehensive context about the TEP process, available variables, control objectives, and engineering constraints to guide the LLM toward defensible control pairings.
+
+### API Support
+The proposer script (`scripts/run_proposer.py`) supports two LLM APIs:
+- **Anthropic Claude API**: Set `ANTHROPIC_API_KEY` in `.env` file
+- **BOB IBM API**: Set `BOB_IBM_API_KEY` and optionally `BOB_MODEL` in `.env` file
+
+The script auto-detects which API key is available and uses the appropriate client. BOB IBM API is prioritized if both keys are present.
 
 ### Prompt Structure
 

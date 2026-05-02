@@ -1,18 +1,19 @@
 # Pull Request: Sprint 1.4 - LLM Proposer Prompt Design
 
 ## Summary
-Implemented LLM-based proposer that generates plant-wide control structure recommendations for the Tennessee Eastman Process using Claude Sonnet 4.
+Implemented LLM-based proposer that generates plant-wide control structure recommendations for the Tennessee Eastman Process. Supports both Anthropic Claude and BOB IBM APIs.
 
 ## Changes
 
 ### New Files
 - `data/proposer_prompt_v1.txt` - Structured prompt with TEP process description, variables, objectives, constraints
 - `data/agent_run.json` - Selected LLM proposal with 11 MV-CV pairings and reasoning traces
-- `scripts/run_proposer.py` - Python script to execute prompt via Anthropic API
-- `.env.template` - API key configuration template
+- `scripts/run_proposer.py` - Python script to execute prompt via Anthropic or BOB IBM API
+- `.env.template` - API key configuration template (supports both APIs)
 
 ### Modified Files
-- `docs/explanations.md` - Added Sprint 1.4 documentation section
+- `docs/explanations.md` - Added Sprint 1.4 documentation section with API support details
+- `requirements.txt` - Added anthropic, python-dotenv, requests dependencies
 
 ## Proposer Results
 
@@ -48,9 +49,31 @@ Generated 11 control loop pairings with confidence distribution:
 - [x] Confidence levels calibrated appropriately
 - [ ] **Engineer approval of all 11 reasoning traces**
 
+## API Configuration
+
+The proposer supports two LLM APIs (auto-detected from environment variables):
+
+### Option 1: Anthropic Claude API
+```bash
+# In .env file
+ANTHROPIC_API_KEY=sk-ant-...your-key...
+```
+
+### Option 2: BOB IBM API
+```bash
+# In .env file
+BOB_IBM_API_KEY=your-bob-key
+BOB_MODEL=claude-3-5-sonnet  # Optional, defaults to claude-3-5-sonnet
+```
+
+The script prioritizes BOB IBM API if both keys are present.
+
 ## Testing
 ```bash
-# Run proposer (requires ANTHROPIC_API_KEY in .env)
+# Install dependencies
+pip install -r requirements.txt
+
+# Run proposer (requires API key in .env)
 python3 scripts/run_proposer.py
 
 # Verify output
