@@ -11,10 +11,20 @@ echo "Running Sprint 1.1 tests..."
 python3 "$SCRIPT_DIR/test_variables.py"
 
 echo ""
+echo "Running Sprint 1.5 verifier tests..."
+python3 "$SCRIPT_DIR/test_verifier.py"
+
+echo ""
 echo "Running Sprint 2.1 renderer visual test..."
 cd "$ROOT_DIR"
 node <<'NODE'
-const esbuild = require("esbuild");
+let esbuild;
+try {
+  esbuild = require("esbuild");
+} catch (error) {
+  console.error("Missing Node dependency: esbuild. Run `npm install` from the repository root.");
+  process.exit(1);
+}
 const fs = require("fs");
 const vm = require("vm");
 

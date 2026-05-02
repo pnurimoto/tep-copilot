@@ -7,8 +7,53 @@ of MV-CV pairings for decentralized control structures.
 """
 
 import json
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any
 from collections import Counter
+
+
+VALID_LEVEL_PAIRINGS = {
+    'XMEAS(8)': {
+        'description': 'Reactor level',
+        'valid_mvs': ['XMV(7)', 'XMV(11)'],  # Separator pot flow or condenser cooling
+        'mv_descriptions': {
+            'XMV(7)': 'Separator pot flow',
+            'XMV(11)': 'Condenser cooling (indirect control)'
+        }
+    },
+    'XMEAS(12)': {
+        'description': 'Separator level',
+        'valid_mvs': ['XMV(7)'],  # Separator pot flow (outflow)
+        'mv_descriptions': {
+            'XMV(7)': 'Separator pot flow'
+        }
+    },
+    'XMEAS(15)': {
+        'description': 'Stripper level',
+        'valid_mvs': ['XMV(8)'],  # Stripper product flow (outflow)
+        'mv_descriptions': {
+            'XMV(8)': 'Stripper product flow'
+        }
+    }
+}
+
+
+def get_inventory_loop_violation(pairing: Dict[str, Any]) -> str:
+    """Return a violation message if an inventory loop uses an invalid MV."""
+    mv = pairing['mv']
+    cv = pairing['cv']
+    config = VALID_LEVEL_PAIRINGS.get(cv)
+
+    if not config or mv in config['valid_mvs']:
+        return ''
+
+    valid_mvs_str = ', '.join(
+        f"{valid_mv} ({config['mv_descriptions'][valid_mv]})"
+        for valid_mv in config['valid_mvs']
+    )
+    return (
+        f"{cv} ({config['description']}): Paired with {mv} "
+        f"but should use one of: {valid_mvs_str}"
+    )
 
 
 def check_mv_uniqueness(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -73,51 +118,23 @@ def check_inventory_loops(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     Returns:
         Dict with 'status' ('pass'/'fail'), 'violations' list, and 'message'
     """
-    # Define valid MV handles for each level CV
-    valid_level_pairings = {
-        'XMEAS(8)': {
-            'description': 'Reactor level',
-            'valid_mvs': ['XMV(7)', 'XMV(11)'],  # Separator pot flow or condenser cooling
-            'mv_descriptions': {
-                'XMV(7)': 'Separator pot flow',
-                'XMV(11)': 'Condenser cooling (indirect control)'
-            }
-        },
-        'XMEAS(12)': {
-            'description': 'Separator level',
-            'valid_mvs': ['XMV(7)'],  # Separator pot flow (outflow)
-            'mv_descriptions': {
-                'XMV(7)': 'Separator pot flow'
-            }
-        },
-        'XMEAS(15)': {
-            'description': 'Stripper level',
-            'valid_mvs': ['XMV(8)'],  # Stripper product flow (outflow)
-            'mv_descriptions': {
-                'XMV(8)': 'Stripper product flow'
-            }
-        }
-    }
-    
     violations = []
     
-    for level_cv, config in valid_level_pairings.items():
-        # Find pairing for this level CV
-        level_pairing = next((p for p in pairings if p['cv'] == level_cv), None)
+    for level_cv, config in VALID_LEVEL_PAIRINGS.items():
+        # Validate every pairing for this level CV. A valid duplicate must not
+        # hide a later invalid duplicate for the same inventory variable.
+        level_pairings = [p for p in pairings if p['cv'] == level_cv]
         
-        if not level_pairing:
+        if not level_pairings:
             violations.append(
                 f"{level_cv} ({config['description']}): No control loop present"
             )
-        elif level_pairing['mv'] not in config['valid_mvs']:
-            valid_mvs_str = ', '.join(
-                f"{mv} ({config['mv_descriptions'][mv]})"
-                for mv in config['valid_mvs']
-            )
-            violations.append(
-                f"{level_cv} ({config['description']}): Paired with {level_pairing['mv']} "
-                f"but should use one of: {valid_mvs_str}"
-            )
+            continue
+
+        for level_pairing in level_pairings:
+            violation = get_inventory_loop_violation(level_pairing)
+            if violation:
+                violations.append(violation)
     
     if violations:
         return {
@@ -235,18 +252,11 @@ def verify_pairing(pairing: Dict[str, Any], all_pairings: List[Dict[str, Any]],
     
     # Check if this is an inventory loop and if it uses a valid MV
     inventory_loop_valid = 'pass'  # Default for non-inventory loops
-    level_cvs = ['XMEAS(8)', 'XMEAS(12)', 'XMEAS(15)']
-    
-    if cv in level_cvs:
-        # This is an inventory loop - check if it failed system-level validation
-        inventory_check = system_checks.get('inventory_loops', {})
-        if inventory_check.get('status') == 'fail':
-            # Check if this specific pairing is mentioned in violations
-            violations = inventory_check.get('violations', [])
-            for violation in violations:
-                if cv in violation:
-                    inventory_loop_valid = 'fail'
-                    break
+
+    if cv in VALID_LEVEL_PAIRINGS:
+        inventory_loop_valid = (
+            'fail' if get_inventory_loop_violation(pairing) else 'pass'
+        )
     
     # Individual pairing checks
     checks = {

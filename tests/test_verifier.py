@@ -76,7 +76,53 @@ def test_bad_pairings():
     print("="*60)
 
 
+def test_duplicate_inventory_cv_validates_each_pairing():
+    """A valid duplicate level loop must not hide a later invalid loop."""
+    pairings = [
+        {
+            'mv': 'XMV(11)',
+            'cv': 'XMEAS(8)',
+            'reasoning': 'Valid reactor level control'
+        },
+        {
+            'mv': 'XMV(3)',
+            'cv': 'XMEAS(8)',
+            'reasoning': 'Invalid duplicate reactor level control'
+        },
+        {
+            'mv': 'XMV(7)',
+            'cv': 'XMEAS(12)',
+            'reasoning': 'Valid separator level control'
+        },
+        {
+            'mv': 'XMV(8)',
+            'cv': 'XMEAS(15)',
+            'reasoning': 'Valid stripper level control'
+        }
+    ]
+
+    results = verify_control_structure(pairings)
+    inventory_check = results['system_checks']['inventory_loops']
+
+    assert inventory_check['status'] == 'fail'
+    assert len(inventory_check['violations']) == 1
+    assert 'XMEAS(8)' in inventory_check['violations'][0]
+    assert 'XMV(3)' in inventory_check['violations'][0]
+
+    reactor_level_results = {
+        result['mv']: result
+        for result in results['pairings']
+        if result['cv'] == 'XMEAS(8)'
+    }
+
+    assert reactor_level_results['XMV(11)']['checks']['inventory_loop_valid'] == 'pass'
+    assert reactor_level_results['XMV(3)']['checks']['inventory_loop_valid'] == 'fail'
+    assert reactor_level_results['XMV(11)']['overall'] == 'pass'
+    assert reactor_level_results['XMV(3)']['overall'] == 'fail'
+
+
 if __name__ == '__main__':
     test_bad_pairings()
+    test_duplicate_inventory_cv_validates_each_pairing()
 
 # Made with Bob
