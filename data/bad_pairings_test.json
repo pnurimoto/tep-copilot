@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "description": "Deliberately bad control structure for testing verifier",
+    "issues": [
+      "XMV(10) used twice (violates MV uniqueness)",
+      "Missing reactor level control (violates inventory loops and mass balance closure)"
+    ]
+  },
+  "pairings": [
+    {
+      "mv": "XMV(10)",
+      "cv": "XMEAS(9)",
+      "reasoning": "Reactor temperature control"
+    },
+    {
+      "mv": "XMV(10)",
+      "cv": "XMEAS(11)",
+      "reasoning": "Separator temperature control - DUPLICATE MV!"
+    },
+    {
+      "mv": "XMV(6)",
+      "cv": "XMEAS(7)",
+      "reasoning": "Reactor pressure control"
+    },
+    {
+      "mv": "XMV(7)",
+      "cv": "XMEAS(12)",
+      "reasoning": "Separator level control"
+    },
+    {
+      "mv": "XMV(8)",
+      "cv": "XMEAS(15)",
+      "reasoning": "Stripper level control"
+    }
+  ]
+}

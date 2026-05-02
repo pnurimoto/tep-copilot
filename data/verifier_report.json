@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "agent_file": "data/agent_run.json",
+    "ricker_file": "data/ricker_baseline.json",
+    "agent_pairing_count": 11,
+    "ricker_pairing_count": 11
+  },
+  "agent": {
+    "pairings": [
+      {
+        "mv": "XMV(10)",
+        "cv": "XMEAS(9)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(11)",
+        "cv": "XMEAS(8)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(6)",
+        "cv": "XMEAS(7)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(7)",
+        "cv": "XMEAS(12)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(8)",
+        "cv": "XMEAS(15)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(9)",
+        "cv": "XMEAS(11)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(1)",
+        "cv": "XMEAS(17)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(4)",
+        "cv": "XMEAS(23)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(2)",
+        "cv": "XMEAS(38)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(3)",
+        "cv": "XMEAS(40)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(12)",
+        "cv": "XMEAS(22)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      }
+    ],
+    "system_checks": {
+      "mv_uniqueness": {
+        "status": "pass",
+        "violations": [],
+        "message": "All MVs are unique"
+      },
+      "inventory_loops": {
+        "status": "pass",
+        "violations": [],
+        "message": "All critical inventory loops present"
+      },
+      "degrees_of_freedom": {
+        "status": "pass",
+        "violations": [],
+        "message": "Degrees of freedom satisfied: 11 loops \u2264 12 MVs"
+      },
+      "mass_balance_closure": {
+        "status": "pass",
+        "violations": [],
+        "message": "Mass balance closure satisfied (all inventory loops present)"
+      }
+    },
+    "overall_status": "pass"
+  },
+  "ricker": {
+    "pairings": [
+      {
+        "mv": "XMV(8)",
+        "cv": "XMEAS(17)",
+        "checks": {
+          "mv_unique": "fail"
+        },
+        "overall": "fail"
+      },
+      {
+        "mv": "XMV(8)",
+        "cv": "XMEAS(15)",
+        "checks": {
+          "mv_unique": "fail"
+        },
+        "overall": "fail"
+      },
+      {
+        "mv": "XMV(7)",
+        "cv": "XMEAS(12)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(11)",
+        "cv": "XMEAS(8)",
+        "checks": {
+          "mv_unique": "fail"
+        },
+        "overall": "fail"
+      },
+      {
+        "mv": "XMV(6)",
+        "cv": "XMEAS(7)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(1)",
+        "cv": "XMEAS(40)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(3)",
+        "cv": "XMEAS(23)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(4)",
+        "cv": "XMEAS(23)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(10)",
+        "cv": "XMEAS(9)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      },
+      {
+        "mv": "XMV(11)",
+        "cv": "XMEAS(11)",
+        "checks": {
+          "mv_unique": "fail"
+        },
+        "overall": "fail"
+      },
+      {
+        "mv": "XMV(2)",
+        "cv": "XMEAS(38)",
+        "checks": {
+          "mv_unique": "pass"
+        },
+        "overall": "pass"
+      }
+    ],
+    "system_checks": {
+      "mv_uniqueness": {
+        "status": "fail",
+        "violations": [
+          "XMV(8) used 2 times",
+          "XMV(11) used 2 times"
+        ],
+        "message": "Found 2 MV(s) used multiple times"
+      },
+      "inventory_loops": {
+        "status": "pass",
+        "violations": [],
+        "message": "All critical inventory loops present"
+      },
+      "degrees_of_freedom": {
+        "status": "pass",
+        "violations": [],
+        "message": "Degrees of freedom satisfied: 11 loops \u2264 12 MVs"
+      },
+      "mass_balance_closure": {
+        "status": "pass",
+        "violations": [],
+        "message": "Mass balance closure satisfied (all inventory loops present)"
+      }
+    },
+    "overall_status": "fail"
+  }
+}
