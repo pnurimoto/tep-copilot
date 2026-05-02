@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "agent_model": "claude-sonnet-4-20250514",
+    "agent_run_timestamp": "2026-05-02T07:59:47.291299Z",
+    "ricker_source": "Ricker 1996 - Journal of Process Control 6(4):205-221",
+    "comparison_generated": "2026-05-02",
+    "methodology": "Loop-by-loop matching on control objective. A loop is 'matched' if agent and Ricker share the same MV and CV. 'Diverged' if they target the same control objective but use a different MV or CV. 'Novel' if the agent proposes a loop with no Ricker analog (CV not present in Ricker's 11 loops)."
+  },
+  "summary": {
+    "total": 11,
+    "matched": 7,
+    "diverged": 3,
+    "novel": 1,
+    "agreement_pct": 63.6
+  },
+  "details": [
+    {
+      "loop_id": 1,
+      "ricker_loop": 16,
+      "control_objective": "Reactor temperature",
+      "agent_mv": "XMV(10)",
+      "agent_cv": "XMEAS(9)",
+      "ricker_mv": "XMV(10)",
+      "ricker_cv": "XMEAS(9)",
+      "status": "matched",
+      "note": "Both structures agree: reactor cooling water controls reactor temperature. This is the most constrained loop — direct exothermic heat removal with fast dynamics and a clear safety requirement."
+    },
+    {
+      "loop_id": 2,
+      "ricker_loop": 11,
+      "control_objective": "Reactor level",
+      "agent_mv": "XMV(11)",
+      "agent_cv": "XMEAS(8)",
+      "ricker_mv": "XMV(11)",
+      "ricker_cv": "XMEAS(8)",
+      "status": "matched",
+      "note": "Both agree on condenser cooling for reactor level — the only feasible option since the reactor has no direct liquid outlet. Increasing condensation rate reduces vapor carryover and allows liquid level to build."
+    },
+    {
+      "loop_id": 3,
+      "ricker_loop": 12,
+      "control_objective": "Reactor pressure",
+      "agent_mv": "XMV(6)",
+      "agent_cv": "XMEAS(7)",
+      "ricker_mv": "XMV(6)",
+      "ricker_cv": "XMEAS(7)",
+      "status": "matched",
+      "note": "Unanimous: purge valve controls reactor pressure. Safety-critical (3000 kPa hard limit) and structurally constrained — the purge is the only direct gas removal handle."
+    },
+    {
+      "loop_id": 4,
+      "ricker_loop": 10,
+      "control_objective": "Separator level",
+      "agent_mv": "XMV(7)",
+      "agent_cv": "XMEAS(12)",
+      "ricker_mv": "XMV(7)",
+      "ricker_cv": "XMEAS(12)",
+      "status": "matched",
+      "note": "Both use separator liquid flow (XMV(7)) to control separator level — standard downstream inventory control with direct outflow manipulation."
+    },
+    {
+      "loop_id": 5,
+      "ricker_loop": 9,
+      "control_objective": "Stripper level",
+      "agent_mv": "XMV(8)",
+      "agent_cv": "XMEAS(15)",
+      "ricker_mv": "XMV(8)",
+      "ricker_cv": "XMEAS(15)",
+      "status": "matched",
+      "note": "Both use product flow (XMV(8)) to control stripper level, consistent with the downstream inventory control strategy throughout the plant."
+    },
+    {
+      "loop_id": 6,
+      "ricker_loop": 15,
+      "control_objective": "Reactor feed A+C composition",
+      "agent_mv": "XMV(4)",
+      "agent_cv": "XMEAS(23)",
+      "ricker_mv": "XMV(4)",
+      "ricker_cv": "XMEAS(23)",
+      "status": "matched",
+      "note": "Both use the A+C feed to control reactor feed composition (XMEAS(23)). Ricker also uses a second loop (XMV(3) → XMEAS(23)) for finer A/C ratio control, which the agent omits in favor of reassigning XMV(3) to product G composition."
+    },
+    {
+      "loop_id": 7,
+      "ricker_loop": 18,
+      "control_objective": "Product E composition",
+      "agent_mv": "XMV(2)",
+      "agent_cv": "XMEAS(38)",
+      "ricker_mv": "XMV(2)",
+      "ricker_cv": "XMEAS(38)",
+      "status": "matched",
+      "note": "Both control E feed rate to regulate product E content — a direct stoichiometric pairing with strong process gain and no structural ambiguity."
+    },
+    {
+      "loop_id": 8,
+      "ricker_loop": 17,
+      "control_objective": "Separator temperature",
+      "agent_mv": "XMV(9)",
+      "agent_cv": "XMEAS(11)",
+      "ricker_mv": "XMV(11)",
+      "ricker_cv": "XMEAS(11)",
+      "status": "diverged",
+      "note": "Agent uses stripper steam valve (XMV(9)) while Ricker uses condenser cooling water (XMV(11)). In Ricker, this loop is the inner (slave) leg of a cascade with reactor level — both share XMV(11). The agent decouples separator temperature from the reactor level cascade, which simplifies the structure but sacrifices disturbance rejection from condenser coolant fluctuations. Using XMV(9) (stripper steam) for separator temperature is an indirect pairing with weaker process gain."
+    },
+    {
+      "loop_id": 9,
+      "ricker_loop": 8,
+      "control_objective": "Production rate",
+      "agent_mv": "XMV(1)",
+      "agent_cv": "XMEAS(17)",
+      "ricker_mv": "XMV(8)",
+      "ricker_cv": "XMEAS(17)",
+      "status": "diverged",
+      "note": "Ricker sets production rate from the outlet (product flow XMV(8)); the agent sets it from the inlet via D feed (XMV(1)), a key rate-limiting reactant. This is a fundamental structural difference in how production throughput is commanded. Ricker's outlet-based approach provides tighter inventory control; the agent's inlet-based approach ties production rate directly to reactant supply, which can cause upstream inventory swings if not carefully tuned."
+    },
+    {
+      "loop_id": 10,
+      "ricker_loop": 13,
+      "control_objective": "Product G composition",
+      "agent_mv": "XMV(3)",
+      "agent_cv": "XMEAS(40)",
+      "ricker_mv": "XMV(1)",
+      "ricker_cv": "XMEAS(40)",
+      "status": "diverged",
+      "note": "Ricker uses D feed (XMV(1)) to control G composition; agent uses A feed (XMV(3)). This divergence is structurally linked to Loop 9: the agent reassigned XMV(1) to production rate, freeing it from composition control. A feed does affect G yield via stoichiometry, so the pairing is not physically wrong, but D feed has a more direct and stronger process gain on G composition since D is the rate-limiting reactant for the G-producing reaction."
+    },
+    {
+      "loop_id": 11,
+      "ricker_loop": null,
+      "control_objective": "Reactor component D control",
+      "agent_mv": "XMV(12)",
+      "agent_cv": "XMEAS(22)",
+      "ricker_mv": null,
+      "ricker_cv": null,
+      "status": "novel",
+      "note": "Ricker has no analog for this pairing. The agent proposes using agitator speed (XMV(12)) to control component D in the reactor feed (XMEAS(22)). This is physically questionable — agitator speed affects mixing intensity but has negligible direct process gain on feed composition, which is determined upstream. The agent correctly flagged this pairing as 'low' confidence. In practice, Ricker leaves XMV(12) uncontrolled (agitator runs at constant speed), which is the conventional approach."
+    }
+  ]
+}

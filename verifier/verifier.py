@@ -11,13 +11,15 @@ from typing import Dict, List, Any
 from collections import Counter
 
 
+VALID_MV_IDS = {f'XMV({i})' for i in range(1, 13)}    # XMV(1)–XMV(12)
+VALID_CV_IDS = {f'XMEAS({i})' for i in range(1, 42)}  # XMEAS(1)–XMEAS(41)
+
 VALID_LEVEL_PAIRINGS = {
     'XMEAS(8)': {
         'description': 'Reactor level',
-        'valid_mvs': ['XMV(7)', 'XMV(11)'],  # Separator pot flow or condenser cooling
+        'valid_mvs': ['XMV(11)'],  # Condenser cooling only — reactor has no direct liquid outlet
         'mv_descriptions': {
-            'XMV(7)': 'Separator pot flow',
-            'XMV(11)': 'Condenser cooling (indirect control)'
+            'XMV(11)': 'Condenser cooling (indirect control via vapor carryover)'
         }
     },
     'XMEAS(12)': {
@@ -54,6 +56,41 @@ def get_inventory_loop_violation(pairing: Dict[str, Any]) -> str:
         f"{cv} ({config['description']}): Paired with {mv} "
         f"but should use one of: {valid_mvs_str}"
     )
+
+
+def check_valid_ids(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Check that all MV and CV identifiers are valid TEP variable IDs.
+
+    Rule: MVs must be XMV(1)–XMV(12) and CVs must be XMEAS(1)–XMEAS(41).
+    Any identifier outside these ranges refers to a non-existent actuator or
+    sensor and represents an impossible control pairing.
+
+    Args:
+        pairings: List of pairing dictionaries with 'mv' and 'cv' keys
+
+    Returns:
+        Dict with 'status' ('pass'/'fail'), 'violations' list, and 'message'
+    """
+    violations = []
+    for p in pairings:
+        mv, cv = p['mv'], p['cv']
+        if mv not in VALID_MV_IDS:
+            violations.append(f"{mv} is not a valid TEP manipulated variable (must be XMV(1)–XMV(12))")
+        if cv not in VALID_CV_IDS:
+            violations.append(f"{cv} is not a valid TEP measurement (must be XMEAS(1)–XMEAS(41))")
+
+    if violations:
+        return {
+            'status': 'fail',
+            'violations': violations,
+            'message': f"Found {len(violations)} invalid variable ID(s)"
+        }
+    return {
+        'status': 'pass',
+        'violations': [],
+        'message': 'All MV and CV identifiers are valid TEP variable IDs'
+    }
 
 
 def check_mv_uniqueness(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -104,7 +141,7 @@ def check_inventory_loops(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     feasible outflow handles.
     
     Valid pairings:
-    - XMEAS(8) Reactor level: XMV(7) separator pot flow, or XMV(11) condenser cooling (indirect)
+    - XMEAS(8) Reactor level: XMV(11) condenser cooling only (no direct liquid outlet exists)
     - XMEAS(12) Separator level: XMV(7) separator pot flow (outflow)
     - XMEAS(15) Stripper level: XMV(8) stripper product flow (outflow)
     
@@ -260,6 +297,8 @@ def verify_pairing(pairing: Dict[str, Any], all_pairings: List[Dict[str, Any]],
     
     # Individual pairing checks
     checks = {
+        'mv_valid': 'pass' if mv in VALID_MV_IDS else 'fail',
+        'cv_valid': 'pass' if cv in VALID_CV_IDS else 'fail',
         'mv_unique': mv_unique,
         'inventory_loop_valid': inventory_loop_valid
     }
@@ -287,6 +326,7 @@ def verify_control_structure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     # System-level checks
     system_checks = {
+        'valid_ids': check_valid_ids(pairings),
         'mv_uniqueness': check_mv_uniqueness(pairings),
         'inventory_loops': check_inventory_loops(pairings),
         'degrees_of_freedom': check_degrees_of_freedom(pairings),
