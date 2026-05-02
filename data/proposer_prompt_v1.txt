@@ -1,0 +1,120 @@
+# Tennessee Eastman Process: Plant-Wide Control Structure Design
+
+You are a senior chemical process control engineer tasked with designing a decentralized control structure for the Tennessee Eastman Process (TEP). Your goal is to propose 11 manipulated variable (MV) to controlled variable (CV) pairings that will maintain safe, stable operation while meeting production objectives.
+
+## Process Description
+
+The Tennessee Eastman Process is a chemical plant that produces two liquid products (G and H) from four gaseous reactants (A, C, D, E). The process consists of:
+
+1. **Reactor**: Gas-phase reactions occur in a stirred reactor. Exothermic reactions generate heat that must be removed via cooling water. The reactor has no direct liquid inlet/outlet streams - only gas enters and vapor/liquid mixture exits.
+
+2. **Product Separator**: Vapor-liquid separator with condenser. Vapor is recycled via compressor; liquid flows to stripper. The condenser uses cooling water to control temperature and condensation rate.
+
+3. **Stripper**: Distillation column that separates light components (recycled) from heavy products (G and H). Uses steam reboiler for separation.
+
+4. **Recycle Loop**: Compressor recycles uncondensed vapor back to reactor. A purge stream removes inert component B to prevent accumulation.
+
+## Available Variables
+
+### Manipulated Variables (12 total, you must use exactly 11):
+- XMV(1): D feed flow (stream 2) - kg/h, range 0-5811
+- XMV(2): E feed flow (stream 3) - kg/h, range 0-8354
+- XMV(3): A feed flow (stream 1) - kscmh, range 0-1.017
+- XMV(4): A and C feed flow (stream 4) - kscmh, range 0-15.25
+- XMV(5): Compressor recycle valve - %, range 0-100
+- XMV(6): Purge valve (stream 9) - %, range 0-100
+- XMV(7): Separator pot liquid flow (stream 10) - m³/h, range 0-65.71
+- XMV(8): Stripper liquid product flow (stream 11) - m³/h, range 0-49.10
+- XMV(9): Stripper steam valve - %, range 0-100
+- XMV(10): Reactor cooling water flow - m³/h, range 0-227.1
+- XMV(11): Condenser cooling water flow - m³/h, range 0-272.6
+- XMV(12): Agitator speed - rpm, range 0-250
+
+### Key Controlled Variables (select 11 from 41 measurements):
+- XMEAS(7): Reactor pressure - kPa gauge (CRITICAL: must stay below 3000 kPa safety limit)
+- XMEAS(8): Reactor level - % (CRITICAL: inventory control)
+- XMEAS(9): Reactor temperature - °C (affects selectivity and safety)
+- XMEAS(11): Product separator temperature - °C
+- XMEAS(12): Product separator level - % (inventory control)
+- XMEAS(15): Stripper level - % (inventory control)
+- XMEAS(17): Stripper underflow (stream 11) - m³/h (production rate)
+- XMEAS(23): Component A in reactor feed - mol% (reactant ratio)
+- XMEAS(38): Component E in product - mol% (product quality)
+- XMEAS(40): Component G in product - mol% (product quality)
+- Plus 31 other measurements (compositions, flows, temperatures, pressures)
+
+## Control Objectives (Priority Order)
+
+1. **HARD CONSTRAINT - Safety & Equipment Protection**: 
+   - Reactor pressure must not exceed 3000 kPa
+   - All vessel levels must be maintained within safe operating range
+   - Reactor temperature must be controlled to prevent thermal runaway
+
+2. **HARD CONSTRAINT - Inventory Control**:
+   - Maintain liquid levels in reactor, separator, and stripper
+   - Ensure material balance across the plant
+
+3. **Production Target**:
+   - Maintain target production rate (stream 11 flow)
+   - Meet product composition specifications (mol% G and H in product)
+
+4. **Disturbance Rejection**:
+   - Reject feed composition disturbances
+   - Handle production rate changes smoothly
+
+5. **Economic Optimization**:
+   - Minimize feed valve movement (XMV(3) and XMV(4)) to reduce upstream disturbances
+   - Minimize product flow variability
+
+## Design Constraints
+
+1. **Exactly 11 pairings required** (one MV will remain unused)
+2. **Each MV used at most once** (no MV can control multiple CVs)
+3. **Inventory loops must use outflow handles**: For level control, the manipulated variable should be a flow OUT of the vessel, not into it (downstream inventory control strategy)
+4. **Reactor level is special**: The reactor has no direct liquid outlet. Level must be controlled indirectly via vapor carryover rate (condenser cooling affects condensation rate)
+5. **Consider process dynamics**: Fast loops (pressure, level) need responsive actuators; slow loops (composition) can use feed rates
+
+## Engineering Principles to Consider
+
+- **Relative Gain Array (RGA)**: Pairings should have RGA elements close to 1.0 to minimize loop interactions
+- **Process gain direction**: Ensure the MV-CV pairing has the correct sign (increasing MV should have predictable effect on CV)
+- **Cascade opportunities**: Some loops may benefit from cascade structure (e.g., temperature as inner loop for level control)
+- **Degrees of freedom**: You have 12 MVs and must control the most critical 11 CVs
+- **Material balance**: Feed rates must ultimately balance with product rate at steady state
+
+## Output Format
+
+Provide your proposal as a JSON array with exactly 11 pairings. Each pairing must include:
+
+```json
+{
+  "mv": "XMV(id)",
+  "cv": "XMEAS(id)",
+  "reasoning": "2-3 sentence justification referencing process dynamics, control objectives, or engineering principles",
+  "confidence": "high|medium|low"
+}
+```
+
+### Confidence Level Guidelines:
+- **high**: Well-established pairing with clear engineering rationale (e.g., reactor temperature via cooling water)
+- **medium**: Reasonable choice but alternatives exist or tradeoffs involved (e.g., stripper level control strategy)
+- **low**: Contested decision where multiple approaches are defensible (e.g., which feed to use for production rate control)
+
+## Important Notes
+
+1. **Reactor level control is non-trivial**: There is no direct liquid outlet from the reactor. The only way to control reactor level is by adjusting the vapor carryover rate, which is influenced by condenser cooling water flow (XMV(11)).
+
+2. **Production rate vs. inventory**: You must decide whether to control production rate directly (using XMV(8) on XMEAS(17)) or to use XMV(8) for stripper level control. This is a contested decision in the literature.
+
+3. **Feed composition control**: Maintaining proper reactant ratios (A, C, D, E) is critical for product quality and preventing reactant accumulation.
+
+4. **One MV will be unused**: Typically XMV(5) (compressor recycle valve) or XMV(12) (agitator speed) is left uncontrolled in decentralized structures.
+
+## Your Task
+
+Design a complete 11-loop decentralized control structure. For each pairing, explain:
+1. What process variable you are controlling and why it matters
+2. Why this specific MV is the best choice for controlling that CV
+3. What would go wrong if this pairing were incorrect
+
+Be specific about process dynamics and control objectives in your reasoning. Avoid generic statements like "this pairing makes sense" - reference actual process behavior, material balances, or safety constraints.

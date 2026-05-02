@@ -9,6 +9,9 @@ venv/
 env/
 ENV/
 
+# References
+references/
+
 # Dataset files (NEVER commit)
 *.RData
 data_raw/
