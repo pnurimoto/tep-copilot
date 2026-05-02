@@ -7,12 +7,12 @@ Saves results to data/agent_run_*.json for review.
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Load environment variables from .env file
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # type: ignore[import-not-found]
     load_dotenv()
 except ImportError:
     print("WARNING: python-dotenv not installed. Install with: pip install python-dotenv")
@@ -49,7 +49,7 @@ def run_proposal_bob(api_key, prompt, run_number, model_name):
     print(f"Running proposal {run_number} (BOB IBM)...")
     print(f"{'='*60}\n")
     
-    import requests
+    import requests  # type: ignore[import-not-found]
     
     # BOB IBM API endpoint
     url = "https://api.bob.ibm.com/v1/chat/completions"
@@ -81,20 +81,21 @@ def extract_pairings(response_text, model_name):
     """Extract pairings JSON from LLM response."""
     # Try to extract JSON from the response
     start_idx = response_text.find('[')
-    end_idx = response_text.rfind(']') + 1
     
-    if start_idx == -1 or end_idx == 0:
+    if start_idx == -1:
         print("WARNING: Could not find JSON array in response")
         return None
     
-    json_str = response_text[start_idx:end_idx]
+    # Try to parse JSON incrementally to handle extra data after the array
+    json_str = response_text[start_idx:]
+    decoder = json.JSONDecoder()
     
     try:
-        pairings = json.loads(json_str)
+        pairings, end_idx = decoder.raw_decode(json_str)
         print(f"Successfully parsed {len(pairings)} pairings")
         return {
             "model": model_name,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "prompt_version": "v1",
             "pairings": pairings,
             "full_response": response_text
@@ -116,9 +117,11 @@ def main():
         run_proposal_func = lambda prompt, run_num: run_proposal_bob(bob_key, prompt, run_num, model_name)
     elif anthropic_key:
         print("Using Anthropic API")
-        import anthropic
+        import anthropic  # type: ignore[import-not-found]
         api_type = "anthropic"
-        model_name = "claude-sonnet-4-20250514"
+        # Use environment variable or default to claude-sonnet-4-6
+        # Note: Model names change over time. Set ANTHROPIC_MODEL env var if needed.
+        model_name = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-4-6')
         client = anthropic.Anthropic(api_key=anthropic_key)
         run_proposal_func = lambda prompt, run_num: run_proposal_anthropic(client, prompt, run_num, model_name)
     else:
