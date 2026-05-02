@@ -1,0 +1,23 @@
+# TEP Copilot Dependencies
+# Dependencies will be added in implementation sprints
+
+# Sprint 001: Data Loading
+# pyreadr
+# pandas
+
+# Sprint 002: Feature Engineering
+# numpy
+# scipy
+
+# Sprint 003: Model Training
+# scikit-learn
+
+# Sprint 004+: UI and Visualization
+# streamlit
+# plotly
+# matplotlib
+
+# Development and Testing
+# pytest
+# pytest-cov
+# ruff

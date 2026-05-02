@@ -1,0 +1,389 @@
+{
+  "metadata": {
+    "source": "Downs, J.J. and Vogel, E.F., 1993. A plant-wide industrial process control problem. Computers & Chemical Engineering, 17(3), pp.245-255.",
+    "schema_version": "1.0",
+    "unit_conventions": {
+      "pressure": "kPa gauge (relative to atmospheric pressure)",
+      "temperature": "°C (degrees Celsius)",
+      "flow_gas": "kscmh (thousand standard cubic meters per hour)",
+      "flow_liquid": "m³/h (cubic meters per hour) or kg/h (kilograms per hour)",
+      "composition": "mol% (mole percent)",
+      "level": "% (percent of vessel capacity)",
+      "power": "kW (kilowatts)",
+      "speed": "rpm (revolutions per minute)"
+    },
+    "notes": {
+      "condenser_cooling": "XMV(11) 'Condenser cooling water flow' controls the cooling water for the product separator condenser, which is measured by XMEAS(22) 'Separator cooling water outlet temperature'. These refer to the same equipment."
+    }
+  },
+  "measurements": [
+    {
+      "id": "XMEAS(1)",
+      "name": "A feed (stream 1)",
+      "units": "kscmh",
+      "location": "Reactor feed"
+    },
+    {
+      "id": "XMEAS(2)",
+      "name": "D feed (stream 2)",
+      "units": "kg/h",
+      "location": "Reactor feed"
+    },
+    {
+      "id": "XMEAS(3)",
+      "name": "E feed (stream 3)",
+      "units": "kg/h",
+      "location": "Reactor feed"
+    },
+    {
+      "id": "XMEAS(4)",
+      "name": "A and C feed (stream 4)",
+      "units": "kscmh",
+      "location": "Reactor feed"
+    },
+    {
+      "id": "XMEAS(5)",
+      "name": "Recycle flow (stream 8)",
+      "units": "kscmh",
+      "location": "Compressor recycle"
+    },
+    {
+      "id": "XMEAS(6)",
+      "name": "Reactor feed rate (stream 6)",
+      "units": "kscmh",
+      "location": "Reactor inlet"
+    },
+    {
+      "id": "XMEAS(7)",
+      "name": "Reactor pressure",
+      "units": "kPa gauge",
+      "location": "Reactor"
+    },
+    {
+      "id": "XMEAS(8)",
+      "name": "Reactor level",
+      "units": "%",
+      "location": "Reactor"
+    },
+    {
+      "id": "XMEAS(9)",
+      "name": "Reactor temperature",
+      "units": "°C",
+      "location": "Reactor"
+    },
+    {
+      "id": "XMEAS(10)",
+      "name": "Purge rate (stream 9)",
+      "units": "kscmh",
+      "location": "Separator purge"
+    },
+    {
+      "id": "XMEAS(11)",
+      "name": "Product separator temperature",
+      "units": "°C",
+      "location": "Separator"
+    },
+    {
+      "id": "XMEAS(12)",
+      "name": "Product separator level",
+      "units": "%",
+      "location": "Separator"
+    },
+    {
+      "id": "XMEAS(13)",
+      "name": "Product separator pressure",
+      "units": "kPa gauge",
+      "location": "Separator"
+    },
+    {
+      "id": "XMEAS(14)",
+      "name": "Product separator underflow (stream 10)",
+      "units": "m³/h",
+      "location": "Separator outlet"
+    },
+    {
+      "id": "XMEAS(15)",
+      "name": "Stripper level",
+      "units": "%",
+      "location": "Stripper"
+    },
+    {
+      "id": "XMEAS(16)",
+      "name": "Stripper pressure",
+      "units": "kPa gauge",
+      "location": "Stripper"
+    },
+    {
+      "id": "XMEAS(17)",
+      "name": "Stripper underflow (stream 11)",
+      "units": "m³/h",
+      "location": "Stripper outlet"
+    },
+    {
+      "id": "XMEAS(18)",
+      "name": "Stripper temperature",
+      "units": "°C",
+      "location": "Stripper"
+    },
+    {
+      "id": "XMEAS(19)",
+      "name": "Stripper steam flow",
+      "units": "kg/h",
+      "location": "Stripper reboiler"
+    },
+    {
+      "id": "XMEAS(20)",
+      "name": "Compressor work",
+      "units": "kW",
+      "location": "Compressor"
+    },
+    {
+      "id": "XMEAS(21)",
+      "name": "Reactor cooling water outlet temperature",
+      "units": "°C",
+      "location": "Reactor cooling"
+    },
+    {
+      "id": "XMEAS(22)",
+      "name": "Separator cooling water outlet temperature",
+      "units": "°C",
+      "location": "Separator cooling"
+    },
+    {
+      "id": "XMEAS(23)",
+      "name": "Component A in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(24)",
+      "name": "Component B in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(25)",
+      "name": "Component C in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(26)",
+      "name": "Component D in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(27)",
+      "name": "Component E in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(28)",
+      "name": "Component F in reactor feed (stream 6)",
+      "units": "mol%",
+      "location": "Reactor feed composition"
+    },
+    {
+      "id": "XMEAS(29)",
+      "name": "Component A in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(30)",
+      "name": "Component B in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(31)",
+      "name": "Component C in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(32)",
+      "name": "Component D in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(33)",
+      "name": "Component E in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(34)",
+      "name": "Component F in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(35)",
+      "name": "Component G in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(36)",
+      "name": "Component H in purge gas (stream 9)",
+      "units": "mol%",
+      "location": "Purge composition"
+    },
+    {
+      "id": "XMEAS(37)",
+      "name": "Component D in product (stream 11)",
+      "units": "mol%",
+      "location": "Product composition"
+    },
+    {
+      "id": "XMEAS(38)",
+      "name": "Component E in product (stream 11)",
+      "units": "mol%",
+      "location": "Product composition"
+    },
+    {
+      "id": "XMEAS(39)",
+      "name": "Component F in product (stream 11)",
+      "units": "mol%",
+      "location": "Product composition"
+    },
+    {
+      "id": "XMEAS(40)",
+      "name": "Component G in product (stream 11)",
+      "units": "mol%",
+      "location": "Product composition"
+    },
+    {
+      "id": "XMEAS(41)",
+      "name": "Component H in product (stream 11)",
+      "units": "mol%",
+      "location": "Product composition"
+    }
+  ],
+  "manipulated": [
+    {
+      "id": "XMV(1)",
+      "name": "D feed flow (stream 2)",
+      "units": "kg/h",
+      "location": "Reactor feed",
+      "range": {
+        "low": 0,
+        "high": 5811
+      }
+    },
+    {
+      "id": "XMV(2)",
+      "name": "E feed flow (stream 3)",
+      "units": "kg/h",
+      "location": "Reactor feed",
+      "range": {
+        "low": 0,
+        "high": 8354
+      }
+    },
+    {
+      "id": "XMV(3)",
+      "name": "A feed flow (stream 1)",
+      "units": "kscmh",
+      "location": "Reactor feed",
+      "range": {
+        "low": 0,
+        "high": 1.017
+      }
+    },
+    {
+      "id": "XMV(4)",
+      "name": "A and C feed flow (stream 4)",
+      "units": "kscmh",
+      "location": "Reactor feed",
+      "range": {
+        "low": 0,
+        "high": 15.25
+      }
+    },
+    {
+      "id": "XMV(5)",
+      "name": "Compressor recycle valve",
+      "units": "%",
+      "location": "Compressor recycle",
+      "range": {
+        "low": 0,
+        "high": 100
+      }
+    },
+    {
+      "id": "XMV(6)",
+      "name": "Purge valve (stream 9)",
+      "units": "%",
+      "location": "Separator purge",
+      "range": {
+        "low": 0,
+        "high": 100
+      }
+    },
+    {
+      "id": "XMV(7)",
+      "name": "Separator pot liquid flow (stream 10)",
+      "units": "m³/h",
+      "location": "Separator outlet",
+      "range": {
+        "low": 0,
+        "high": 65.71
+      }
+    },
+    {
+      "id": "XMV(8)",
+      "name": "Stripper liquid product flow (stream 11)",
+      "units": "m³/h",
+      "location": "Stripper outlet",
+      "range": {
+        "low": 0,
+        "high": 49.10
+      }
+    },
+    {
+      "id": "XMV(9)",
+      "name": "Stripper steam valve",
+      "units": "%",
+      "location": "Stripper reboiler",
+      "range": {
+        "low": 0,
+        "high": 100
+      }
+    },
+    {
+      "id": "XMV(10)",
+      "name": "Reactor cooling water flow",
+      "units": "m³/h",
+      "location": "Reactor cooling",
+      "range": {
+        "low": 0,
+        "high": 227.1
+      }
+    },
+    {
+      "id": "XMV(11)",
+      "name": "Condenser cooling water flow",
+      "units": "m³/h",
+      "location": "Separator cooling",
+      "range": {
+        "low": 0,
+        "high": 272.6
+      }
+    },
+    {
+      "id": "XMV(12)",
+      "name": "Agitator speed",
+      "units": "rpm",
+      "location": "Reactor",
+      "range": {
+        "low": 0,
+        "high": 250
+      }
+    }
+  ]
+}

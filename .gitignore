@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Dataset files (NEVER commit)
+*.RData
+data_raw/
+dataverse_files/
+datasets/*.RData
+
+# Model artifacts
+models_trained/*.pkl
+models_trained/*.joblib
+models_trained/*.h5
+
+# Secrets (NEVER commit)
+.env
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Made with Bob
