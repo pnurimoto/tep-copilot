@@ -232,3 +232,57 @@ If the prompt design is inadequate, symptoms would include:
 
 The Engineer's domain knowledge is the final check: read all 11 reasoning traces and flag any that are clearly wrong before approving for the demo.
 - Ricker, N.L., 1996. Decentralized control of the Tennessee Eastman Challenge Process. Journal of Process Control, 6(4), pp.205-221.
+
+## Sprint 1.6: Agent vs. Ricker Comparison
+
+### Overview
+
+`data/comparison.json` contains a loop-by-loop alignment of the agent's 11 proposed pairings against the Ricker 1996 baseline. The comparison classifies each loop as **matched**, **diverged**, or **novel**.
+
+### Comparison Methodology
+
+Matching is done by **control objective**, not loop index. For each agent pairing:
+
+1. Identify the control objective (e.g., "reactor temperature," "production rate") by matching the CV to a Ricker loop.
+2. If the agent's MV and CV are identical to Ricker's → **matched**.
+3. If the agent targets the same CV but uses a different MV (or the same MV but a different CV) → **diverged**.
+4. If the agent proposes a CV that appears in none of Ricker's 11 loops → **novel**.
+
+Agreement percentage = matched / total = 7/11 ≈ **63.6%**.
+
+### Results Summary
+
+| Status | Count | Loops |
+|--------|-------|-------|
+| Matched | 7 | Reactor temp, reactor level, reactor pressure, separator level, stripper level, feed A+C ratio, product E |
+| Diverged | 3 | Separator temperature, production rate, product G composition |
+| Novel | 1 | Reactor component D via agitator speed |
+
+### What Matched (7/11)
+
+The agent agreed with Ricker on all five inventory and pressure loops (reactor level, reactor pressure, separator level, stripper level) and on three composition/temperature loops (reactor temperature, feed A+C ratio, product E). These are the most structurally constrained loops — in most cases only one physically feasible pairing exists (e.g., reactor level via condenser cooling is the only option since the reactor has no liquid outlet).
+
+### Where the Agent Diverged (3/11)
+
+**Loop 8 — Separator Temperature (XMV(9) vs. XMV(11)):**
+
+Ricker uses condenser cooling water (XMV(11)) as the inner leg of a cascade with reactor level. The agent uses stripper steam (XMV(9)) instead. This breaks the cascade structure. The agent's choice is physically defensible — steam does affect column heat balance — but the process gain is weaker and disturbance rejection from condenser coolant is lost.
+
+**Loop 9 — Production Rate (XMV(1) vs. XMV(8)):**
+
+This is the most consequential divergence. Ricker commands production rate from the **outlet** (product flow, XMV(8)); the agent commands it from the **inlet** (D feed, XMV(1)). Both approaches appear in the academic literature, but they create fundamentally different inventory dynamics. Outlet-based control (Ricker) tightens the material balance from downstream; inlet-based control (agent) ties throughput directly to reactant supply, which can propagate disturbances upstream. This choice is worth discussing in the demo.
+
+**Loop 10 — Product G Composition (XMV(3) vs. XMV(1)):**
+
+Ricker uses D feed (XMV(1)) to control G composition; the agent uses A feed (XMV(3)). This divergence is **structurally coupled** to Loop 9: because the agent already assigned XMV(1) to production rate, it repurposes XMV(3) here. A feed does influence G yield via stoichiometry, but D feed has a more direct and stronger gain on G composition since D is the rate-limiting reactant for the G-producing reaction.
+
+### The Novel Loop (1/11)
+
+The agent proposes using agitator speed (XMV(12)) to control component D in the reactor feed (XMEAS(22)). Ricker leaves the agitator at constant speed — a standard practice in TEP control studies. The agent correctly assigned "low" confidence to this pairing. In the physical process, agitator speed affects mixing intensity but has negligible gain on feed composition, which is set upstream. This pairing is the agent's weakest proposal and the clearest area where domain expertise would override the LLM suggestion.
+
+### Engineering Significance
+
+The 63.6% agreement rate tells a useful story for the demo: **the agent gets all the hard-constrained loops right** (the ones where there's only one answer) but diverges on contested design decisions — exactly where human expertise adds value. The three divergences are all defensible from a pure text-reasoning perspective, yet an experienced controls engineer would likely prefer Ricker's choices based on process gain, cascade structure, and inventory dynamics. This demonstrates the intended human-in-the-loop role of the copilot: the agent narrows the solution space and forces explicit discussion of the contested decisions.
+
+### References
+- Ricker, N.L., 1996. Decentralized control of the Tennessee Eastman Challenge Process. Journal of Process Control, 6(4), pp.205-221.
