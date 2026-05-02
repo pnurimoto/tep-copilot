@@ -11,7 +11,8 @@
         "mv": "XMV(10)",
         "cv": "XMEAS(9)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -19,7 +20,8 @@
         "mv": "XMV(11)",
         "cv": "XMEAS(8)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -27,7 +29,8 @@
         "mv": "XMV(6)",
         "cv": "XMEAS(7)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -35,7 +38,8 @@
         "mv": "XMV(7)",
         "cv": "XMEAS(12)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -43,7 +47,8 @@
         "mv": "XMV(8)",
         "cv": "XMEAS(15)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -51,7 +56,8 @@
         "mv": "XMV(9)",
         "cv": "XMEAS(11)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -59,7 +65,8 @@
         "mv": "XMV(1)",
         "cv": "XMEAS(17)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -67,7 +74,8 @@
         "mv": "XMV(4)",
         "cv": "XMEAS(23)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -75,7 +83,8 @@
         "mv": "XMV(2)",
         "cv": "XMEAS(38)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -83,7 +92,8 @@
         "mv": "XMV(3)",
         "cv": "XMEAS(40)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -91,7 +101,8 @@
         "mv": "XMV(12)",
         "cv": "XMEAS(22)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       }
@@ -105,7 +116,7 @@
       "inventory_loops": {
         "status": "pass",
         "violations": [],
-        "message": "All critical inventory loops present"
+        "message": "All critical inventory loops present with valid MV handles"
       },
       "degrees_of_freedom": {
         "status": "pass",
@@ -126,7 +137,8 @@
         "mv": "XMV(8)",
         "cv": "XMEAS(17)",
         "checks": {
-          "mv_unique": "fail"
+          "mv_unique": "fail",
+          "inventory_loop_valid": "pass"
         },
         "overall": "fail"
       },
@@ -134,7 +146,8 @@
         "mv": "XMV(8)",
         "cv": "XMEAS(15)",
         "checks": {
-          "mv_unique": "fail"
+          "mv_unique": "fail",
+          "inventory_loop_valid": "pass"
         },
         "overall": "fail"
       },
@@ -142,7 +155,8 @@
         "mv": "XMV(7)",
         "cv": "XMEAS(12)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -150,7 +164,8 @@
         "mv": "XMV(11)",
         "cv": "XMEAS(8)",
         "checks": {
-          "mv_unique": "fail"
+          "mv_unique": "fail",
+          "inventory_loop_valid": "pass"
         },
         "overall": "fail"
       },
@@ -158,7 +173,8 @@
         "mv": "XMV(6)",
         "cv": "XMEAS(7)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -166,7 +182,8 @@
         "mv": "XMV(1)",
         "cv": "XMEAS(40)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -174,7 +191,8 @@
         "mv": "XMV(3)",
         "cv": "XMEAS(23)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -182,7 +200,8 @@
         "mv": "XMV(4)",
         "cv": "XMEAS(23)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -190,7 +209,8 @@
         "mv": "XMV(10)",
         "cv": "XMEAS(9)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       },
@@ -198,7 +218,8 @@
         "mv": "XMV(11)",
         "cv": "XMEAS(11)",
         "checks": {
-          "mv_unique": "fail"
+          "mv_unique": "fail",
+          "inventory_loop_valid": "pass"
         },
         "overall": "fail"
       },
@@ -206,7 +227,8 @@
         "mv": "XMV(2)",
         "cv": "XMEAS(38)",
         "checks": {
-          "mv_unique": "pass"
+          "mv_unique": "pass",
+          "inventory_loop_valid": "pass"
         },
         "overall": "pass"
       }
@@ -223,7 +245,7 @@
       "inventory_loops": {
         "status": "pass",
         "violations": [],
-        "message": "All critical inventory loops present"
+        "message": "All critical inventory loops present with valid MV handles"
       },
       "degrees_of_freedom": {
         "status": "pass",
