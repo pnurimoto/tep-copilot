@@ -50,11 +50,18 @@ def check_mv_uniqueness(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def check_inventory_loops(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Check that all critical inventory variables (levels) have control loops.
+    Check that all critical inventory variables (levels) have control loops
+    with appropriate manipulated variables (outflow handles).
     
     Rule: Every vessel with liquid holdup must have level control to prevent
     overflow or running dry. For TEP: reactor level (XMEAS(8)), separator level
-    (XMEAS(12)), and stripper level (XMEAS(15)) must all be controlled.
+    (XMEAS(12)), and stripper level (XMEAS(15)) must all be controlled by
+    feasible outflow handles.
+    
+    Valid pairings:
+    - XMEAS(8) Reactor level: XMV(7) separator pot flow, or XMV(11) condenser cooling (indirect)
+    - XMEAS(12) Separator level: XMV(7) separator pot flow (outflow)
+    - XMEAS(15) Stripper level: XMV(8) stripper product flow (outflow)
     
     If wrong, symptom is: Vessel overflow causing safety trips, or vessel
     running dry causing pump cavitation, loss of seal, and potential equipment
@@ -66,30 +73,63 @@ def check_inventory_loops(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
     Returns:
         Dict with 'status' ('pass'/'fail'), 'violations' list, and 'message'
     """
-    required_levels = {
-        'XMEAS(8)': 'Reactor level',
-        'XMEAS(12)': 'Product separator level',
-        'XMEAS(15)': 'Stripper level'
+    # Define valid MV handles for each level CV
+    valid_level_pairings = {
+        'XMEAS(8)': {
+            'description': 'Reactor level',
+            'valid_mvs': ['XMV(7)', 'XMV(11)'],  # Separator pot flow or condenser cooling
+            'mv_descriptions': {
+                'XMV(7)': 'Separator pot flow',
+                'XMV(11)': 'Condenser cooling (indirect control)'
+            }
+        },
+        'XMEAS(12)': {
+            'description': 'Separator level',
+            'valid_mvs': ['XMV(7)'],  # Separator pot flow (outflow)
+            'mv_descriptions': {
+                'XMV(7)': 'Separator pot flow'
+            }
+        },
+        'XMEAS(15)': {
+            'description': 'Stripper level',
+            'valid_mvs': ['XMV(8)'],  # Stripper product flow (outflow)
+            'mv_descriptions': {
+                'XMV(8)': 'Stripper product flow'
+            }
+        }
     }
     
-    controlled_cvs = {p['cv'] for p in pairings}
-    missing_levels = []
+    violations = []
     
-    for level_cv, description in required_levels.items():
-        if level_cv not in controlled_cvs:
-            missing_levels.append(f"{level_cv} ({description})")
+    for level_cv, config in valid_level_pairings.items():
+        # Find pairing for this level CV
+        level_pairing = next((p for p in pairings if p['cv'] == level_cv), None)
+        
+        if not level_pairing:
+            violations.append(
+                f"{level_cv} ({config['description']}): No control loop present"
+            )
+        elif level_pairing['mv'] not in config['valid_mvs']:
+            valid_mvs_str = ', '.join(
+                f"{mv} ({config['mv_descriptions'][mv]})"
+                for mv in config['valid_mvs']
+            )
+            violations.append(
+                f"{level_cv} ({config['description']}): Paired with {level_pairing['mv']} "
+                f"but should use one of: {valid_mvs_str}"
+            )
     
-    if missing_levels:
+    if violations:
         return {
             'status': 'fail',
-            'violations': missing_levels,
-            'message': f"Missing control for {len(missing_levels)} critical level(s)"
+            'violations': violations,
+            'message': f"Found {len(violations)} inventory loop issue(s)"
         }
     
     return {
         'status': 'pass',
         'violations': [],
-        'message': 'All critical inventory loops present'
+        'message': 'All critical inventory loops present with valid MV handles'
     }
 
 
@@ -173,13 +213,15 @@ def check_mass_balance_closure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]
     }
 
 
-def verify_pairing(pairing: Dict[str, Any], all_pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
+def verify_pairing(pairing: Dict[str, Any], all_pairings: List[Dict[str, Any]],
+                   system_checks: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Verify a single pairing against all rules.
+    Verify a single pairing against all applicable rules.
     
     Args:
         pairing: Single pairing dict with 'mv' and 'cv' keys
         all_pairings: Complete list of all pairings for context
+        system_checks: Results from system-level checks
         
     Returns:
         Dict with check results and overall status
@@ -191,9 +233,25 @@ def verify_pairing(pairing: Dict[str, Any], all_pairings: List[Dict[str, Any]]) 
     mv_count = sum(1 for p in all_pairings if p['mv'] == mv)
     mv_unique = 'pass' if mv_count == 1 else 'fail'
     
+    # Check if this is an inventory loop and if it uses a valid MV
+    inventory_loop_valid = 'pass'  # Default for non-inventory loops
+    level_cvs = ['XMEAS(8)', 'XMEAS(12)', 'XMEAS(15)']
+    
+    if cv in level_cvs:
+        # This is an inventory loop - check if it failed system-level validation
+        inventory_check = system_checks.get('inventory_loops', {})
+        if inventory_check.get('status') == 'fail':
+            # Check if this specific pairing is mentioned in violations
+            violations = inventory_check.get('violations', [])
+            for violation in violations:
+                if cv in violation:
+                    inventory_loop_valid = 'fail'
+                    break
+    
     # Individual pairing checks
     checks = {
-        'mv_unique': mv_unique
+        'mv_unique': mv_unique,
+        'inventory_loop_valid': inventory_loop_valid
     }
     
     # Overall status for this pairing
@@ -225,8 +283,8 @@ def verify_control_structure(pairings: List[Dict[str, Any]]) -> Dict[str, Any]:
         'mass_balance_closure': check_mass_balance_closure(pairings)
     }
     
-    # Individual pairing verification
-    pairing_results = [verify_pairing(p, pairings) for p in pairings]
+    # Individual pairing verification (pass system_checks for context)
+    pairing_results = [verify_pairing(p, pairings, system_checks) for p in pairings]
     
     # Overall system status
     system_pass = all(check['status'] == 'pass' for check in system_checks.values())
