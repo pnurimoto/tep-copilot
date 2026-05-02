@@ -1,10 +1,10 @@
-# TEP Copilot Product Spec
+# TEP Control Structure Replay Product Spec
 
 ## Objective
 
 Build a local-first, browser-based recorded demo for the Tennessee Eastman Process benchmark that shows an LLM-proposed plant-wide control structure, verifies it against deterministic engineering rules, and compares it with the Ricker 1996 baseline. The final judge-facing experience should be a static replay-style interface with no live API calls, no backend, and no claim of closed-loop plant simulation.
 
-## Hackathon Submission Strategy
+The current product story is control-structure design and verification. It is not a Streamlit fault-detection dashboard, not a model-vs-SPC app, and not a live plant simulator.
 
 - The project is a proof-of-concept solution built with IBM Bob IDE as a core development component, not only static documentation.
 - The final README and demo must explain how IBM Bob helped turn the idea into a working artifact faster, including repository planning, implementation, documentation, tests, or review.
@@ -12,13 +12,13 @@ Build a local-first, browser-based recorded demo for the Tennessee Eastman Proce
 - Bob session artifacts are submission evidence. Do not fabricate them, summarize them in place of exports, or omit them from the final repository.
 - watsonx usage is optional for this project unless the hackathon organizers give a stricter team-specific requirement. The core app must remain runnable locally without IBM Cloud credentials.
 
-## Single Source Of Truth
+## Hackathon Submission Strategy
 
-- `spec.md` is the controlling project plan and product contract.
-- IBM Bob must be able to start from this repository without any separate playbook file.
-- `SKILL.md` contains operating rules for Bob, but if `SKILL.md` conflicts with `spec.md`, `spec.md` wins.
-- If `sprints/` does not exist yet, Bob must create sprint contract files from the Sprint Roadmap in this spec before implementing application code.
-- Once sprint files exist, each implementation task must follow the active sprint contract and remain inside that sprint boundary.
+- The project is a proof-of-concept built with IBM Bob IDE as a core development component.
+- The final README and demo should explain how IBM Bob helped produce the data catalog, proposer prompt, verifier, renderer groundwork, documentation, tests, and review evidence.
+- The final repository must include `bob_sessions/` with relevant exported Bob IDE task-history markdown files and any required judging evidence.
+- Bob session artifacts are submission evidence. Do not fabricate them, summarize them in place of exports, or omit them from the final repository.
+- watsonx usage is optional unless the hackathon rules impose a stricter requirement. The default demo must remain runnable locally without IBM Cloud credentials.
 
 ## Source-Grounded Facts
 
@@ -30,17 +30,28 @@ Build a local-first, browser-based recorded demo for the Tennessee Eastman Proce
 
 ## Required Repo Layout
 
-The repository root is the project root. Bob should create any missing directories and support files from this spec during bootstrap.
+The repository root is the project root. Do not nest the app under another top-level project folder.
 
+Primary layout:
+
+- `data/` - variables, objectives, baseline pairings, recorded proposer outputs, verifier reports.
+- `verifier/` - deterministic Python verification rules and explanations.
+- `renderer/` - React/SVG symbol vocabulary and future P&ID renderer modules.
+- `tests/` - validation scripts and smoke tests.
+- `docs/` - human-readable explanations and pitch/demo notes.
+- `sprints/` - sprint contracts and roadmap.
+- `bob_sessions/` - Bob IDE exported session evidence.
+- `assets/` - static visual assets such as the TEP flowsheet SVG.
 
 Rules:
-- Keep this layout as the primary app architecture.
-- Add only minimal support files or directories that are required for generator control, references, Bob judging evidence, tests, and PR workflow.
-- Do not nest the app under another top-level folder.
-- Do not include `tep_hackathon_playbook.md` in the repository.
-- The raw dataset may exist beside the repository on the local machine, but not inside the repository.
 
-## Required App Surface
+- Do not include `tep_hackathon_playbook.md` in the repository.
+- Keep raw datasets, generated model artifacts, caches, local credentials, and API keys out of Git.
+- Add only support files required for the control-structure replay demo, verification, rendering, documentation, tests, or submission evidence.
+
+## Required Demo Surface
+
+The intended judge-facing surface is a static browser demo built from recorded artifacts.
 
 - The future judge-facing interface must show the LLM proposal, verifier results, and Ricker baseline comparison as a recorded/static replay.
 - The interface may be built as a static browser app; no backend or live API call is required for the default demo.
@@ -50,15 +61,18 @@ Rules:
 
 ## Sprint Roadmap
 
-Bob must create sprint contract files under `sprints/` from this roadmap if they are missing. Each sprint file should include: metadata, activation preconditions, product goal, what will be built, explicit out-of-scope items, done criteria, test plan, pass/fail thresholds, allowed file scope, and guardrails.
+The active roadmap is the sprint set already tracked under `sprints/`.
 
-### Sprint 000: Bootstrap Files Only
+Day 1 foundations:
 
-- Goal: create the controlled repo shape and sprint contract stack before app code exists.
-- Allowed files: `spec.md`, `SKILL.md`, `README.md`, `requirements.txt`, `.gitignore`, `.github/pull_request_template.md`, `references/`, `bob_sessions/README.md`, `sprints/`, `tests/.gitkeep`, `models_trained/.gitkeep`, and empty app directories with `.gitkeep` files if needed.
-- Must create sprint contracts for Sprints 000 through 008 from this roadmap.
-- Must not create `app.py` or app modules.
-- Done when the repo has the required structure, docs, ignore rules, citation metadata, Bob evidence folder, PR template, and sprint files.
+- Sprint 1.1: variable extraction and objectives.
+- Sprint 1.2: TEP simulator time-box and Tier 1 fallback.
+- Sprint 1.3: Ricker baseline encoding.
+- Sprint 1.4: LLM proposer prompt and recorded run.
+- Sprint 1.5: verifier construction.
+- Sprint 1.6: agent-vs-Ricker comparison.
+
+Day 2 demo build:
 
 ## Recorded Demo Constraint
 
@@ -67,7 +81,7 @@ Bob must create sprint contract files under `sprints/` from this roadmap if they
 - Any score or cost implication shown in a future training mode must be described as advisory, not as proof that the operator optimized plant behavior.
 - The app must not claim to be a live simulator, a closed-loop trainer, or a control optimizer unless a controllable simulator is added later.
 
-## Shared Footer Rule
+## Architecture Principles
 
 - Every page in the software must render the same shared references footer.
 - The footer must include at minimum:
@@ -77,7 +91,9 @@ Bob must create sprint contract files under `sprints/` from this roadmap if they
 - Footer content must be loaded from local files in `references/`, not hardcoded separately on each page.
 - The footer rule applies to the main UI and any later support pages.
 
-## Data Policy
+1. Proposer: reads variables and objectives, then emits structured pairings JSON with reasoning.
+2. Verifier: checks pairings with deterministic Python rules and produces pass/fail details.
+3. Renderer: consumes pairings and layout data, then draws SVG/P&ID output deterministically.
 
 - Raw `.RData` dataset files are local-only and must not be committed to GitHub.
 - The current control-structure replay does not require the Rieth `.RData` files.
@@ -86,7 +102,7 @@ Bob must create sprint contract files under `sprints/` from this roadmap if they
 - Small synthetic fixtures may be added later for tests, but the published Rieth dataset stays out of the repo.
 - Do not use client data, personal information, social-media data, company-confidential data, or any data without permission from the data owner.
 
-## IBM Platform Policy
+## Data And Secrets Policy
 
 - IBM Bob IDE is required for the hackathon workflow and judging evidence.
 - Bob task-session exports belong in `bob_sessions/` and should be reviewed for secrets before commit.
@@ -96,46 +112,35 @@ Bob must create sprint contract files under `sprints/` from this roadmap if they
 
 ## Cross-Platform Rule
 
-- macOS and Windows must both work with Python `3.11`, `venv`, and `pip`.
-- Avoid Docker, Conda, Makefiles, Linux-only shell assumptions, and hardcoded absolute paths.
-- Setup and run steps must be expressible in both Terminal and PowerShell.
-- File paths and local environment assumptions must be platform-safe.
+- Python checks should run on macOS and Windows with Python 3.11+ where practical.
+- Avoid Docker, Conda-only workflows, Linux-only assumptions, and hardcoded absolute paths.
+- Setup and run steps should be expressible in both Terminal and PowerShell when they become part of the documented workflow.
+- JavaScript tooling must be declared in a repo-local package file before it is treated as a required workflow.
 
 ## GitHub PR Rule
 
 - Work one sprint at a time.
 - Use one branch per sprint and one PR per sprint.
-- Each PR must include:
-  - goal
-  - changed behavior
-  - local run steps
-  - human verification checklist
-  - references touched
-  - Bob session evidence produced or not applicable yet
-  - known limitations
-- The sprint contract for the active sprint is the implementation boundary for that PR.
+- Each PR should include goal, changed behavior, local run steps, human verification checklist, references touched, Bob session evidence, and known limitations.
+- The active sprint contract is the implementation boundary for that PR.
 
 ## Generator Boundaries
 
-- The generator must obey `spec.md`.
-- If sprint files are missing, the generator must first create the repo structure and sprint contracts from this spec, then stop for human review.
-- After sprint files exist, the generator must obey the active sprint file.
-- The generator must not create app code outside the current sprint scope.
-- The generator must not introduce repo shape drift from this spec without explicit approval in `spec.md` or the active sprint contract.
-- The generator must not commit dataset files or copied copyrighted article content.
-- The generator must not invent closed-loop simulator behavior or control-optimization claims from replay-only data.
-- Sprint 000 is documentation/bootstrap only. No app code modules are to be created in this sprint.
+- Follow the active sprint file and this reconciled spec.
+- Do not add app code outside the current sprint scope.
+- Do not introduce repo-shape drift without updating `spec.md` and the active sprint contract first.
+- Do not commit dataset files, credentials, copied paper text, or copied paper figures.
+- Do not invent simulator behavior or control-optimization claims from replay-only data.
+- Prefer small, reviewable changes that preserve the proposer/verifier/renderer separation.
 
 ## Human Responsibilities
 
-- Create and own the GitHub repo.
+- Own the GitHub repo and final submission.
 - Use the hackathon-provisioned IBM Bob IDE account for project tasks that will be submitted for judging.
-- Place the local source materials at repo root.
-- Keep the raw dataset local and out of Git.
-- Export relevant Bob IDE task-history markdown files and task-session consumption summary screenshots into `bob_sessions/`.
-- Start each sprint intentionally and review the resulting files.
-- Run visible verification steps and review draft PRs.
-- Reject scope creep and merge only after the checklist passes.
+- Keep raw source datasets and secrets local.
+- Export relevant Bob IDE task-history files and judging evidence into `bob_sessions/`.
+- Review sprint outputs before advancing.
+- Run visible verification steps and review PRs.
 - Own the final README narrative, screenshots, demo flow, and submission packaging.
 
 ## Acceptance Criteria
