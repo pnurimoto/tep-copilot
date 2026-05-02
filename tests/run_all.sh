@@ -237,4 +237,196 @@ console.log("Layout smoke test passed with 5 units, 12 valves, and 41 measuremen
 NODE
 
 echo ""
+echo "Running Sprint 2.3 P&ID renderer smoke test..."
+node <<'NODE'
+let esbuild;
+try {
+  esbuild = require("esbuild");
+} catch (error) {
+  console.error("Missing Node dependency: esbuild. Run `npm install` from the repository root.");
+  process.exit(1);
+}
+const fs = require("fs");
+const vm = require("vm");
+
+const result = esbuild.buildSync({
+  entryPoints: ["renderer/render.jsx"],
+  bundle: true,
+  write: false,
+  jsx: "transform",
+  jsxFactory: "h",
+  jsxFragment: "Fragment",
+  format: "cjs",
+  platform: "node",
+  logLevel: "silent",
+});
+
+function normalizeChildren(children) {
+  return children.flat(Infinity).filter((child) => child !== null && child !== undefined && child !== false);
+}
+
+function h(type, props, ...children) {
+  if (typeof type === "function") {
+    return type({
+      ...(props || {}),
+      children: children.length === 1 ? children[0] : normalizeChildren(children),
+    });
+  }
+
+  return {
+    type,
+    props: props || {},
+    children: normalizeChildren(children),
+  };
+}
+
+function Fragment({ children }) {
+  return children;
+}
+
+const attrNames = {
+  strokeWidth: "stroke-width",
+  strokeLinejoin: "stroke-linejoin",
+  strokeLinecap: "stroke-linecap",
+  strokeDasharray: "stroke-dasharray",
+  vectorEffect: "vector-effect",
+  textAnchor: "text-anchor",
+  fontSize: "font-size",
+  fontWeight: "font-weight",
+  fontFamily: "font-family",
+};
+
+function escapeText(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function escapeAttribute(value) {
+  return escapeText(value).replaceAll('"', "&quot;");
+}
+
+function renderNode(node) {
+  if (Array.isArray(node)) {
+    return node.map(renderNode).join("");
+  }
+
+  if (typeof node === "string" || typeof node === "number") {
+    return escapeText(node);
+  }
+
+  if (!node || typeof node !== "object") {
+    return "";
+  }
+
+  const attributes = Object.entries(node.props || {})
+    .filter(([name, value]) => name !== "children" && name !== "key" && value !== undefined && value !== false)
+    .map(([name, value]) => {
+      const attrName = attrNames[name] || name;
+      return value === true ? attrName : `${attrName}="${escapeAttribute(value)}"`;
+    })
+    .join(" ");
+
+  const openTag = attributes ? `<${node.type} ${attributes}>` : `<${node.type}>`;
+  return `${openTag}${node.children.map(renderNode).join("")}</${node.type}>`;
+}
+
+const module = { exports: {} };
+vm.runInNewContext(result.outputFiles[0].text, {
+  module,
+  exports: module.exports,
+  require,
+  console,
+  h,
+  Fragment,
+  Math,
+  Array,
+  Number,
+  String,
+  Object,
+  Map,
+  Set,
+});
+
+const {
+  DIVERGED_COLOR,
+  MATCHED_COLOR,
+  renderPID,
+  renderPIDSideBySide,
+} = module.exports;
+
+if (typeof renderPID !== "function") {
+  throw new Error("renderer/render.jsx must export renderPID");
+}
+if (typeof renderPIDSideBySide !== "function") {
+  throw new Error("renderer/render.jsx must export renderPIDSideBySide");
+}
+
+const agentRun = JSON.parse(fs.readFileSync("data/agent_run.json", "utf8"));
+const rickerBaseline = JSON.parse(fs.readFileSync("data/ricker_baseline.json", "utf8"));
+const comparison = JSON.parse(fs.readFileSync("data/comparison.json", "utf8"));
+const comparisonByAgentPair = new Map();
+for (const detail of comparison.details) {
+  if (detail.agent_mv && detail.agent_cv) {
+    comparisonByAgentPair.set(`${detail.agent_mv}->${detail.agent_cv}`, detail);
+  }
+}
+
+const enrichedAgentPairings = agentRun.pairings.map((pairing, index) => {
+  const detail = comparisonByAgentPair.get(`${pairing.mv}->${pairing.cv}`);
+  return {
+    ...pairing,
+    loop_id: detail?.loop_id || index + 1,
+    loop_name: detail?.control_objective,
+    status: detail?.status,
+  };
+});
+
+const agentSvg = renderNode(
+  renderPID(enrichedAgentPairings, true, {
+    title: "Agent Run",
+    subtitle: "Rendered from data/agent_run.json with comparison divergence metadata.",
+  })
+);
+const rickerSvg = renderNode(
+  renderPID(rickerBaseline.pairings, false, {
+    title: "Ricker 1996 Baseline",
+    subtitle: "Rendered from data/ricker_baseline.json.",
+  })
+);
+const sideBySideSvg = renderNode(renderPIDSideBySide(enrichedAgentPairings, rickerBaseline.pairings, true));
+
+for (const [name, svg] of [
+  ["agent", agentSvg],
+  ["ricker", rickerSvg],
+  ["side-by-side", sideBySideSvg],
+]) {
+  for (const expected of ["Reactor", "Separator", "Stripper", "PIC-", "green = matched", "oxblood = diverged"]) {
+    if (!svg.includes(expected)) {
+      throw new Error(`${name} P&ID SVG missing expected label: ${expected}`);
+    }
+  }
+}
+
+for (const expected of ["XMV(8)", "XMEAS(15)", "Stripper level", "PIC-15"]) {
+  if (!rickerSvg.includes(expected)) {
+    throw new Error(`Ricker P&ID SVG missing stripper level loop detail: ${expected}`);
+  }
+}
+
+if (!agentSvg.includes(DIVERGED_COLOR)) {
+  throw new Error("Agent P&ID did not render any divergent loops in oxblood");
+}
+if (!agentSvg.includes(MATCHED_COLOR)) {
+  throw new Error("Agent P&ID did not render any matched loops in green");
+}
+
+fs.writeFileSync("/private/tmp/tep-pid-agent.svg", agentSvg);
+fs.writeFileSync("/private/tmp/tep-pid-ricker.svg", rickerSvg);
+fs.writeFileSync("/private/tmp/tep-pid-side-by-side.svg", sideBySideSvg);
+console.log("P&ID renderer smoke test rendered /private/tmp/tep-pid-agent.svg, /private/tmp/tep-pid-ricker.svg, and /private/tmp/tep-pid-side-by-side.svg");
+NODE
+
+echo ""
 echo "All tests passed ✓"
