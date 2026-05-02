@@ -77,7 +77,6 @@ def test_variables_json():
     print(f"✓ Validated {len(manipulated)} XMV variables with location fields")
     print("✓ Metadata block present with source, schema_version, unit_conventions")
     print("✓ Condenser/separator cooling clarification present")
-    return True
 
 if __name__ == "__main__":
     try:
