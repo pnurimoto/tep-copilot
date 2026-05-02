@@ -1,172 +1,194 @@
-# TEP Copilot Product Spec
+# TEP Control Structure Replay Product Spec
 
 ## Objective
 
-Build a local-first Streamlit app for the Tennessee Eastman Process benchmark that demonstrates earlier fault detection than classical 3-sigma SPC by combining domain-informed engineered features with a lightweight ML workflow. The final judge-facing experience must be a single main dashboard in `app.py`, centered on a default `Copilot` flow and optionally including a secondary replay-based operator decision challenge. Support pages for QA and review are allowed, but they must remain secondary to the main dashboard story.
+Build a local-first, recorded browser demo for the Tennessee Eastman Process (TEP) that shows an LLM proposing a plant-wide decentralized control structure, a deterministic verifier checking that proposal against engineering rules, and an SVG renderer comparing the agent proposal with the Ricker 1996 baseline.
+
+The current product story is control-structure design and verification. It is not a Streamlit fault-detection dashboard, not a model-vs-SPC app, and not a live plant simulator.
+
+## Current Repository Contract
+
+The codebase currently implements these foundations:
+
+- `data/variables.json` with 41 measured variables and 12 manipulated variables.
+- `data/objectives.md` with control objectives.
+- `data/ricker_baseline.json` with the published baseline structure encoded for comparison.
+- `data/agent_run.json` and related run artifacts with recorded LLM proposer output.
+- `verifier/verifier.py` with structural engineering checks for MV uniqueness, inventory loops, degrees of freedom, and mass-balance closure.
+- `renderer/symbols.jsx` with reusable SVG/React P&ID symbol primitives.
+- `tests/` with Python validation scripts and a renderer smoke test.
+
+Not implemented yet:
+
+- No `app.py` or Streamlit surface.
+- No runnable React/Vite app under `app/`.
+- No complete P&ID layout or pairing-to-diagram renderer beyond isolated symbols.
+- No live API-backed proposer in the demo path.
+- No closed-loop simulator or replay dynamics affected by user choices.
+
+## Code Wins Rule
+
+When repository docs conflict with implemented code, tracked sprint contracts, or existing data artifacts, the implemented repository wins. Fix stale documentation to match the code before adding new behavior.
+
+`spec.md` is the high-level product contract after this reconciliation. Sprint files under `sprints/` define the active implementation boundaries. If a future product change intentionally moves away from the existing implementation, update `spec.md`, the relevant sprint file, and the README together before writing code.
 
 ## Hackathon Submission Strategy
 
-- The project is a proof-of-concept solution built with IBM Bob IDE as a core development component, not only an industrial ML dashboard.
-- The final README and demo must explain how IBM Bob helped turn the idea into a working artifact faster, including repository planning, implementation, documentation, tests, or review.
-- The final repository must include a `bob_sessions/` folder containing the relevant exported Bob IDE task-history markdown files and task-session consumption summary screenshots required for judging.
+- The project is a proof-of-concept built with IBM Bob IDE as a core development component.
+- The final README and demo should explain how IBM Bob helped produce the data catalog, proposer prompt, verifier, renderer groundwork, documentation, tests, and review evidence.
+- The final repository must include `bob_sessions/` with relevant exported Bob IDE task-history markdown files and any required judging evidence.
 - Bob session artifacts are submission evidence. Do not fabricate them, summarize them in place of exports, or omit them from the final repository.
-- watsonx usage is optional for this project unless the hackathon organizers give a stricter team-specific requirement. The core app must remain runnable locally without IBM Cloud credentials.
-
-## Single Source Of Truth
-
-- `spec.md` is the controlling project plan and product contract.
-- IBM Bob must be able to start from this repository without any separate playbook file.
-- `SKILL.md` contains operating rules for Bob, but if `SKILL.md` conflicts with `spec.md`, `spec.md` wins.
-- If `sprints/` does not exist yet, Bob must create sprint contract files from the Sprint Roadmap in this spec before implementing application code.
-- Once sprint files exist, each implementation task must follow the active sprint contract and remain inside that sprint boundary.
+- watsonx usage is optional unless the hackathon rules impose a stricter requirement. The default demo must remain runnable locally without IBM Cloud credentials.
 
 ## Source-Grounded Facts
 
 - The benchmark process is the Tennessee Eastman Process introduced by Downs and Vogel (1993), DOI `10.1016/0098-1354(93)80018-I`.
-- The dataset is Rieth et al. (2017), *Additional Tennessee Eastman Process Simulation Data for Anomaly Detection Evaluation*, Harvard Dataverse, DOI `10.7910/DVN/6C3JR1`.
-- The Rieth dataset is distributed as four `.RData` tables: fault-free training, fault-free testing, faulty training, and faulty testing.
-- Each row contains `faultNumber`, `simulationRun`, `sample`, `xmeas_1..41`, and `xmv_1..11`.
-- The original process has 41 measured variables and 12 manipulated variables; the Rieth dataset omits `xmv_12` because agitator speed is held constant.
-- Training runs are 500 samples long and testing runs are 960 samples long. The sample interval is 3 minutes.
-- In faulty training runs, the first post-fault point is sample 21. In faulty testing runs, the first post-fault point is sample 161.
-- The local flowsheet SVG already supports live placeholders for continuous tags `XMEAS 1-22`. The analyzer banks for `XMEAS 23-41` are drawn but not yet individually bindable.
+- Ricker (1996), "Decentralized control of the Tennessee Eastman Challenge Process," is the baseline control-structure reference used for comparison.
+- The process has 41 measured variables and 12 manipulated variables in the current project catalog.
+- The Rieth et al. (2017) dataset, DOI `10.7910/DVN/6C3JR1`, may be cited as a related TEP data source, but the current replay demo does not depend on loading raw `.RData` files.
+- Paper text, copyrighted figures, and raw dataset files must not be copied into this repository.
 
 ## Required Repo Layout
 
-The repository root is the project root. Bob should create any missing directories and support files from this spec during bootstrap.
+The repository root is the project root. Do not nest the app under another top-level project folder.
 
+Primary layout:
+
+- `data/` - variables, objectives, baseline pairings, recorded proposer outputs, verifier reports.
+- `verifier/` - deterministic Python verification rules and explanations.
+- `renderer/` - React/SVG symbol vocabulary and future P&ID renderer modules.
+- `tests/` - validation scripts and smoke tests.
+- `docs/` - human-readable explanations and pitch/demo notes.
+- `sprints/` - sprint contracts and roadmap.
+- `bob_sessions/` - Bob IDE exported session evidence.
+- `assets/` - static visual assets such as the TEP flowsheet SVG.
 
 Rules:
-- Keep this layout as the primary app architecture.
-- Add only minimal support files or directories that are required for generator control, references, Bob judging evidence, tests, and PR workflow.
-- Do not nest the app under another top-level folder.
+
 - Do not include `tep_hackathon_playbook.md` in the repository.
-- The raw dataset may exist beside the repository on the local machine, but not inside the repository.
+- Keep raw datasets, generated model artifacts, caches, local credentials, and API keys out of Git.
+- Add only support files required for the control-structure replay demo, verification, rendering, documentation, tests, or submission evidence.
 
-## Required App Surface
+## Required Demo Surface
 
-- `app.py` remains the main judge-facing dashboard and must implement this spec's core story: flowsheet, time series, callout, replay controls, and model-vs-SPC narrative.
-- `app.py` may include a secondary `Training Challenge` mode, but `Copilot` remains the default judge-facing flow.
-- Any training interaction in v1 must be single-step, replay-based, and advisory rather than a live simulator.
-- Support pages are allowed later for development and review, such as Data QA, Feature QA, and Model Results.
-- Support pages must not replace the main dashboard or change the product story.
-- The app must degrade gracefully when local data or model artifacts are missing.
+The intended judge-facing surface is a static browser demo built from recorded artifacts.
+
+Required behavior for the future UI:
+
+- Start from prepared local JSON files, not live LLM calls.
+- Show that the LLM produced structured MV-CV pairings and reasoning.
+- Run or replay deterministic verifier results.
+- Render or preview P&ID-style diagrams from deterministic renderer code.
+- Compare the agent proposal against the Ricker baseline.
+- Display a visible "RECORDED RUN" label.
+- Keep runtime suitable for a short stage demo, targeting roughly 35-60 seconds.
+
+Out of scope for the current demo:
+
+- Streamlit `app.py`.
+- Fault-detection model training.
+- Earlier-than-SPC claims.
+- User actions that change future plant trajectory.
+- Live closed-loop simulation.
+- Claims that the app optimizes controls directly.
 
 ## Sprint Roadmap
 
-Bob must create sprint contract files under `sprints/` from this roadmap if they are missing. Each sprint file should include: metadata, activation preconditions, product goal, what will be built, explicit out-of-scope items, done criteria, test plan, pass/fail thresholds, allowed file scope, and guardrails.
+The active roadmap is the sprint set already tracked under `sprints/`.
 
-### Sprint 000: Bootstrap Files Only
+Day 1 foundations:
 
-- Goal: create the controlled repo shape and sprint contract stack before app code exists.
-- Allowed files: `spec.md`, `SKILL.md`, `README.md`, `requirements.txt`, `.gitignore`, `.github/pull_request_template.md`, `references/`, `bob_sessions/README.md`, `sprints/`, `tests/.gitkeep`, `models_trained/.gitkeep`, and empty app directories with `.gitkeep` files if needed.
-- Must create sprint contracts for Sprints 000 through 008 from this roadmap.
-- Must not create `app.py` or app modules.
-- Done when the repo has the required structure, docs, ignore rules, citation metadata, Bob evidence folder, PR template, and sprint files.
+- Sprint 1.1: variable extraction and objectives.
+- Sprint 1.2: TEP simulator time-box and Tier 1 fallback.
+- Sprint 1.3: Ricker baseline encoding.
+- Sprint 1.4: LLM proposer prompt and recorded run.
+- Sprint 1.5: verifier construction.
+- Sprint 1.6: agent-vs-Ricker comparison.
 
-## Replay-Based Training Constraint
+Day 2 demo build:
 
-- The Rieth dataset provides fixed replay trajectories; operator choices in v1 do not change future plant state.
-- If a `Training Challenge` is implemented, it must pause at a selected replay point, collect a first diagnostic or control move, score that move against a local curated rubric, and then continue the same replay unchanged.
-- Any cost implication shown in training mode is advisory and derived from the replay and cost model; it is not proof that the operator optimized plant behavior.
-- The app must not claim to be a live simulator, a closed-loop trainer, or a control optimizer unless a controllable simulator is added later.
+- Sprint 2.1: SVG symbol vocabulary.
+- Sprint 2.2: hardcoded TEP layout.
+- Sprint 2.3: P&ID rendering function.
+- Sprint 2.4: replay UI integration.
+- Sprint 2.5: pitch script and documentation.
+- Sprint 2.6: dry runs and polish.
+- Sprint 2.7: deployment and final checks.
 
-## Shared Footer Rule
+Each implementation task must stay inside the active sprint file's allowed scope unless the human explicitly updates the sprint contract.
 
-- Every page in the software must render the same shared references footer.
-- The footer must include at minimum:
-  - dataset citation and DOI
-  - benchmark paper citation and DOI
-  - provenance note stating that figures in the app are redrawn or generated from cited data and that original paper pages are not reproduced
-- Footer content must be loaded from local files in `references/`, not hardcoded separately on each page.
-- The footer rule applies to the main dashboard and any later support pages.
+## Architecture Principles
 
-## Data Policy
+The three-layer separation must remain auditable:
 
-- Raw `.RData` dataset files are local-only and must not be committed to GitHub.
-- The repo must ignore dataset storage locations such as `data_raw/`, `dataverse_files/`, and `*.RData`.
-- The app must read the dataset from a local ignored location.
-- If the dataset is missing, the app must show a friendly setup message rather than a traceback.
-- Small synthetic fixtures may be added later for tests, but the published Rieth dataset stays out of the repo.
-- Do not use client data, personal information, social-media data, company-confidential data, or any data without permission from the data owner.
+1. Proposer: reads variables and objectives, then emits structured pairings JSON with reasoning.
+2. Verifier: checks pairings with deterministic Python rules and produces pass/fail details.
+3. Renderer: consumes pairings and layout data, then draws SVG/P&ID output deterministically.
 
-## IBM Platform Policy
+If a judge asks whether the LLM drew the diagram, the answer is no. The LLM produced structured pairings; deterministic code renders the diagram.
 
-- IBM Bob IDE is required for the hackathon workflow and judging evidence.
-- Bob task-session exports belong in `bob_sessions/` and should be reviewed for secrets before commit.
-- IBM Cloud credentials, IBM API keys, watsonx access tokens, and `.streamlit/secrets.toml` must never be committed.
-- If optional watsonx.ai artifacts are added later, do not use out-of-scope hackathon features or models identified in the guide.
-- The app must not require a live watsonx or IBM Cloud account to run the default local demo.
+## Data And Secrets Policy
+
+- `.env`, API keys, IBM Cloud credentials, watsonx tokens, and `.streamlit/secrets.toml` must never be committed.
+- Raw Rieth/TEP `.RData` files must stay local and ignored.
+- Generated model artifacts must stay ignored unless a future sprint explicitly changes that policy.
+- Bob session exports should be reviewed for secrets before commit.
+- Do not use client data, personal information, company-confidential data, or any data without permission from the data owner.
 
 ## Cross-Platform Rule
 
-- macOS and Windows must both work with Python `3.11`, `venv`, and `pip`.
-- Avoid Docker, Conda, Makefiles, Linux-only shell assumptions, and hardcoded absolute paths.
-- Setup and run steps must be expressible in both Terminal and PowerShell.
-- File paths and local environment assumptions must be platform-safe.
+- Python checks should run on macOS and Windows with Python 3.11+ where practical.
+- Avoid Docker, Conda-only workflows, Linux-only assumptions, and hardcoded absolute paths.
+- Setup and run steps should be expressible in both Terminal and PowerShell when they become part of the documented workflow.
+- JavaScript tooling must be declared in a repo-local package file before it is treated as a required workflow.
 
 ## GitHub PR Rule
 
 - Work one sprint at a time.
 - Use one branch per sprint and one PR per sprint.
-- Each PR must include:
-  - goal
-  - changed behavior
-  - local run steps
-  - human verification checklist
-  - references touched
-  - Bob session evidence produced or not applicable yet
-  - known limitations
-- The sprint contract for the active sprint is the implementation boundary for that PR.
+- Each PR should include goal, changed behavior, local run steps, human verification checklist, references touched, Bob session evidence, and known limitations.
+- The active sprint contract is the implementation boundary for that PR.
 
 ## Generator Boundaries
 
-- The generator must obey `spec.md`.
-- If sprint files are missing, the generator must first create the repo structure and sprint contracts from this spec, then stop for human review.
-- After sprint files exist, the generator must obey the active sprint file.
-- The generator must not create app code outside the current sprint scope.
-- The generator must not introduce repo shape drift from this spec without explicit approval in `spec.md` or the active sprint contract.
-- The generator must not commit dataset files or copied copyrighted article content.
-- The generator must not invent closed-loop simulator behavior or control-optimization claims from replay-only data.
-- Sprint 000 is documentation/bootstrap only. No app code modules are to be created in this sprint.
+- Follow the active sprint file and this reconciled spec.
+- Do not add app code outside the current sprint scope.
+- Do not introduce repo-shape drift without updating `spec.md` and the active sprint contract first.
+- Do not commit dataset files, credentials, copied paper text, or copied paper figures.
+- Do not invent simulator behavior or control-optimization claims from replay-only data.
+- Prefer small, reviewable changes that preserve the proposer/verifier/renderer separation.
 
 ## Human Responsibilities
 
-- Create and own the GitHub repo.
+- Own the GitHub repo and final submission.
 - Use the hackathon-provisioned IBM Bob IDE account for project tasks that will be submitted for judging.
-- Place the local source materials at repo root.
-- Keep the raw dataset local and out of Git.
-- Export relevant Bob IDE task-history markdown files and task-session consumption summary screenshots into `bob_sessions/`.
-- Start each sprint intentionally and review the resulting files.
-- Run visible verification steps and review draft PRs.
-- Reject scope creep and merge only after the checklist passes.
+- Keep raw source datasets and secrets local.
+- Export relevant Bob IDE task-history files and judging evidence into `bob_sessions/`.
+- Review sprint outputs before advancing.
+- Run visible verification steps and review PRs.
 - Own the final README narrative, screenshots, demo flow, and submission packaging.
 
 ## Acceptance Criteria
 
-- Repo root stays spec-aligned and not nested under another app folder.
-- `app.py` remains reserved as the future main dashboard entrypoint.
-- Every later page must use the shared references footer.
-- The dataset policy is explicit and enforceable through `.gitignore` and the docs.
-- macOS and Windows compatibility is a stated product requirement from the start.
-- The generator has a clear operating contract and sprint boundary before code generation begins.
-- The final repo contains `bob_sessions/` with relevant IBM Bob IDE task evidence for judging.
-- The README frames the artifact as Bob-assisted delivery of a process copilot, not just standalone data science.
-- Any operator-training interaction is explicitly described as replay-based and not as a plant simulator.
-- The main judge-facing story remains earlier fault detection first, with training challenge behavior secondary.
+- Repo root stays aligned with the control-structure replay architecture.
+- README, `spec.md`, and sprint files describe the same product direction.
+- The default demo path uses recorded local artifacts and no live credentials.
+- The verifier output is deterministic and traceable to local JSON inputs.
+- Renderer output is deterministic and does not imply the LLM drew diagrams directly.
+- Bob session evidence is present and reviewed for secrets.
+- Raw data, model artifacts, and credentials remain out of Git.
+- Any future operator-training behavior is described as replay-based unless a real controllable simulator is added.
 
 ## Out Of Scope
 
-- Uploading the full Rieth dataset to GitHub
-- Committing IBM Cloud credentials, Bob account secrets, API keys, or watsonx access tokens
-- Fabricating or replacing Bob IDE session exports with hand-written summaries
-- Reproducing copyrighted paper figures or article pages
-- Cloud deployment
-- Dockerization
-- Conda-specific workflows
-- Auto-merge or unattended PR approval
-- Building application modules during Sprint 000
-- A live closed-loop operator simulator built from the Rieth replay dataset alone
-- Causal proof that a user action minimized plant cost
-- Claims that user-entered control moves change the future replay trajectory in v1
-- Claims that the app optimizes controls directly from user actions in v1
+- Streamlit dashboard work unless a future spec update intentionally reintroduces it.
+- Uploading the full Rieth dataset to GitHub.
+- Committing IBM Cloud credentials, Bob account secrets, API keys, or watsonx access tokens.
+- Fabricating or replacing Bob IDE session exports with hand-written summaries.
+- Reproducing copyrighted paper figures or article pages.
+- Live LLM inference in the stage demo.
+- Backend services for the current demo.
+- Cloud deployment as a requirement for local verification.
+- Dockerization or Conda-specific workflows.
+- Auto-merge or unattended PR approval.
+- A live closed-loop operator simulator built from replay data alone.
