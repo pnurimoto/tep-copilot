@@ -1,0 +1,2 @@
+# This file preserves the models_trained/ directory in git
+# Model artifacts (*.pkl, *.joblib, *.h5) are gitignored

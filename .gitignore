@@ -1,21 +1,45 @@
-.venv/
+# Python
 __pycache__/
-.pytest_cache/
-.ruff_cache/
-.streamlit/secrets.toml
-.env
-.env.*
-*.pem
-*.key
-secrets/
-IBM-Bob-Dev-Day-hackathon-guide.pdf
-tep_hackathon_playbook.md
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Dataset files (NEVER commit)
+*.RData
 data_raw/
 dataverse_files/
-datasets/
-*.RData
+datasets/*.RData
+
+# Model artifacts
 models_trained/*.pkl
 models_trained/*.joblib
-tep-copilot/
+models_trained/*.h5
+
+#References
+references/
+
+# Secrets (NEVER commit)
+.env
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
-Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Made with Bob
