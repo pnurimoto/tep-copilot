@@ -286,3 +286,30 @@ The 63.6% agreement rate tells a useful story for the demo: **the agent gets all
 
 ### References
 - Ricker, N.L., 1996. Decentralized control of the Tennessee Eastman Challenge Process. Journal of Process Control, 6(4), pp.205-221.
+
+## Sprint 2.2: Hardcoded TEP Layout
+
+### Overview
+
+`renderer/layout.jsx` defines a fixed 1200x800 SVG coordinate system for the Tennessee Eastman Process P&ID renderer. The layout is intentionally hardcoded because Sprint 2 is a recorded demo path: later renderer work needs stable anchors for equipment, valves, measurements, and comparison overlays, not an auto-layout engine.
+
+### Layout Rationale
+
+The major units are arranged left-to-right in the same direction as the main material path:
+
+1. Reactor feed valves and feed flow taps sit on the left edge because streams 1-4 enter the reactor.
+2. The reactor is the first main unit because TEP reactions occur before cooling and vapor-liquid separation.
+3. The condenser is placed between the reactor and separator because reactor effluent is cooled before entering the product separator.
+4. The separator is placed after the condenser because it splits vapor purge/recycle from liquid underflow.
+5. The stripper is placed to the far right because separator liquid underflow feeds the stripper and final product exits from the stripper bottoms.
+6. The compressor is placed above the reactor/condenser/separator path to make the recycle loop visible without crossing the main liquid path.
+
+### Measurement And Valve Placement
+
+The XMV positions are anchored near the physical handles they manipulate: XMV(1)-XMV(4) on the feed bank, XMV(5) on the compressor recycle loop, XMV(6) on the purge, XMV(7) on separator liquid outlet, XMV(8) on product outlet, XMV(9) on stripper steam, XMV(10) on reactor cooling, XMV(11) on condenser cooling, and XMV(12) on the reactor agitator.
+
+The XMEAS positions follow the same physical grouping. XMEAS(1)-XMEAS(6) are near the feed manifold and reactor inlet; XMEAS(7)-XMEAS(9) are on the reactor; XMEAS(10) and XMEAS(29)-XMEAS(36) are on the purge/analyzer branch; XMEAS(11)-XMEAS(14) are around the separator; XMEAS(15)-XMEAS(19) are around the stripper and reboiler; XMEAS(20) is on the compressor; XMEAS(21)-XMEAS(22) are on the cooling-water services; and XMEAS(37)-XMEAS(41) are near the final product analyzer.
+
+### Review Notes
+
+This is a reasonable approximation of TEP topology for the demo, not a copied process drawing. The most important review checks are that units do not overlap, the main flow reads reactor -> condenser -> separator -> stripper, and composition analyzers are visually grouped with the stream they sample.
