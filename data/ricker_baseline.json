@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "source": "Ricker 1996",
+    "citation": "Ricker, N.L., 1996. Decentralized control of the Tennessee Eastman Challenge Process. Journal of Process Control, 6(4), pp.205-221.",
+    "description": "Baseline decentralized control structure with 11 primary control loops",
+    "notes": "Loops 1-7 are ratio controllers cascaded with flow controllers. Only the primary 11 loops are included here."
+  },
+  "pairings": [
+    {
+      "loop": 8,
+      "mv": "XMV(8)",
+      "cv": "XMEAS(17)",
+      "loop_name": "Production rate control",
+      "reasoning": "Controls stripper liquid product flow (stream 11) to maintain production rate target with feedback adjustment"
+    },
+    {
+      "loop": 9,
+      "mv": "XMV(8)",
+      "cv": "XMEAS(15)",
+      "loop_name": "Stripper level control",
+      "reasoning": "Uses product flow to control stripper bottoms liquid level, following downstream inventory control strategy"
+    },
+    {
+      "loop": 10,
+      "mv": "XMV(7)",
+      "cv": "XMEAS(12)",
+      "loop_name": "Separator level control",
+      "reasoning": "Controls separator liquid level using separator pot liquid flow, coordinated with stripper level to reduce product flow fluctuations"
+    },
+    {
+      "loop": 11,
+      "mv": "XMV(11)",
+      "cv": "XMEAS(8)",
+      "loop_name": "Reactor level control",
+      "reasoning": "Controls reactor liquid level by adjusting condenser cooling to affect vapor carryover rate, as no direct liquid flows exist"
+    },
+    {
+      "loop": 12,
+      "mv": "XMV(6)",
+      "cv": "XMEAS(7)",
+      "loop_name": "Reactor pressure control",
+      "reasoning": "Uses purge valve to control reactor pressure by balancing gas entry and exit rates, critical for safety and optimal operation"
+    },
+    {
+      "loop": 13,
+      "mv": "XMV(1)",
+      "cv": "XMEAS(40)",
+      "loop_name": "Product G composition control",
+      "reasoning": "D feed rate controls product composition to maintain specified mol% G in product stream"
+    },
+    {
+      "loop": 14,
+      "mv": "XMV(3)",
+      "cv": "XMEAS(23)",
+      "loop_name": "Reactor feed %A control",
+      "reasoning": "A feed flow controls percentage of A relative to A+C in reactor feed to maintain excess reactants"
+    },
+    {
+      "loop": 15,
+      "mv": "XMV(4)",
+      "cv": "XMEAS(23)",
+      "loop_name": "Reactor feed %A+C control",
+      "reasoning": "A+C feed flow controls total A+C percentage in reactor feed to ensure reactants are in excess for rate-limiting control"
+    },
+    {
+      "loop": 16,
+      "mv": "XMV(10)",
+      "cv": "XMEAS(9)",
+      "loop_name": "Reactor temperature control",
+      "reasoning": "Reactor cooling water flow controls reactor temperature to maintain selectivity and prevent thermal runaway"
+    },
+    {
+      "loop": 17,
+      "mv": "XMV(11)",
+      "cv": "XMEAS(11)",
+      "loop_name": "Separator temperature control",
+      "reasoning": "Condenser cooling water flow controls separator temperature as inner loop of cascade for reactor level control"
+    },
+    {
+      "loop": 18,
+      "mv": "XMV(2)",
+      "cv": "XMEAS(38)",
+      "loop_name": "Product E composition control",
+      "reasoning": "E feed rate controls product composition to maintain specified mol% E in product stream"
+    }
+  ]
+}
