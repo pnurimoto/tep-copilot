@@ -8,6 +8,7 @@ venv/
 .venv/
 env/
 ENV/
+.env
 
 # Dataset files (NEVER commit)
 *.RData
