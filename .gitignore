@@ -20,6 +20,9 @@ models_trained/*.pkl
 models_trained/*.joblib
 models_trained/*.h5
 
+#References
+references/
+
 # Secrets (NEVER commit)
 .env
 .streamlit/secrets.toml

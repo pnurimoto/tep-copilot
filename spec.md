@@ -1,144 +1,172 @@
-## What we are building
+# TEP Copilot Product Spec
 
-A browser-based, recorded demo of an LLM agent that proposes a plant-wide control structure for the Tennessee Eastman Process (TEP), verifies it against engineering rules, renders both the agent’s proposal and a published baseline as P&IDs, and compares them side by side. The output is a static web app that plays a 35-to-60 second “agent run” without any live API calls.
+## Objective
 
-This is a 2-day hackathon deliverable. Scope is tight by design.
+Build a local-first Streamlit app for the Tennessee Eastman Process benchmark that demonstrates earlier fault detection than classical 3-sigma SPC by combining domain-informed engineered features with a lightweight ML workflow. The final judge-facing experience must be a single main dashboard in `app.py`, centered on a default `Copilot` flow and optionally including a secondary replay-based operator decision challenge. Support pages for QA and review are allowed, but they must remain secondary to the main dashboard story.
 
-## Why this is interesting
+## Hackathon Submission Strategy
 
-Plant-wide control structure design (which manipulated variable controls which controlled variable, across an entire process) is a senior chemical engineering judgment task that takes days of expert reasoning. Tennessee Eastman is the canonical 33-year-old benchmark for this problem. Classical solutions (Ricker 1996, Luyben, McAvoy) disagree on the contested decisions. As of writing, no one has published an LLM-driven plant-wide control structure design on TEP. This project is a first cut, framed honestly with its gaps marked.
+- The project is a proof-of-concept solution built with IBM Bob IDE as a core development component, not only an industrial ML dashboard.
+- The final README and demo must explain how IBM Bob helped turn the idea into a working artifact faster, including repository planning, implementation, documentation, tests, or review.
+- The final repository must include a `bob_sessions/` folder containing the relevant exported Bob IDE task-history markdown files and task-session consumption summary screenshots required for judging.
+- Bob session artifacts are submission evidence. Do not fabricate them, summarize them in place of exports, or omit them from the final repository.
+- watsonx usage is optional for this project unless the hackathon organizers give a stricter team-specific requirement. The core app must remain runnable locally without IBM Cloud credentials.
 
-The headline is the LLM/agent architecture, not the chemistry. Judges are technical (engineers/devs). Assume they recognize “benchmark” framing and skip extended TEP background.
+## Single Source Of Truth
 
-## What success looks like (the demo, end to end)
+- `spec.md` is the controlling project plan and product contract.
+- IBM Bob must be able to start from this repository without any separate playbook file.
+- `SKILL.md` contains operating rules for Bob, but if `SKILL.md` conflicts with `spec.md`, `spec.md` wins.
+- If `sprints/` does not exist yet, Bob must create sprint contract files from the Sprint Roadmap in this spec before implementing application code.
+- Once sprint files exist, each implementation task must follow the active sprint contract and remain inside that sprint boundary.
 
-A single-page web app, served statically. User clicks “Run agent.” A 35-to-60 second sequence plays:
+## Source-Grounded Facts
 
-1. Console-style “loading paper” + “parsing variables” lines appear.
-1. The LLM prompt streams in token by token.
-1. Eleven MV-CV pairings appear one by one, each with a short reasoning trace that streams in character by character.
-1. A verifier sweep animates over the pairings, marking each green (passes) or oxblood (fails or diverges from baseline).
-1. Summary stats animate in: 11 loops total, X matched, Y diverged, Z% agreement.
-1. Two P&IDs render side by side: agent’s proposal and Ricker (1996) baseline. Divergent loops highlighted.
-1. A greyed-out “Phase 4: simulator-in-the-loop” panel appears as roadmap signal.
+- The benchmark process is the Tennessee Eastman Process introduced by Downs and Vogel (1993), DOI `10.1016/0098-1354(93)80018-I`.
+- The dataset is Rieth et al. (2017), *Additional Tennessee Eastman Process Simulation Data for Anomaly Detection Evaluation*, Harvard Dataverse, DOI `10.7910/DVN/6C3JR1`.
+- The Rieth dataset is distributed as four `.RData` tables: fault-free training, fault-free testing, faulty training, and faulty testing.
+- Each row contains `faultNumber`, `simulationRun`, `sample`, `xmeas_1..41`, and `xmv_1..11`.
+- The original process has 41 measured variables and 12 manipulated variables; the Rieth dataset omits `xmv_12` because agitator speed is held constant.
+- Training runs are 500 samples long and testing runs are 960 samples long. The sample interval is 3 minutes.
+- In faulty training runs, the first post-fault point is sample 21. In faulty testing runs, the first post-fault point is sample 161.
+- The local flowsheet SVG already supports live placeholders for continuous tags `XMEAS 1-22`. The analyzer banks for `XMEAS 23-41` are drawn but not yet individually bindable.
 
-There is no live LLM inference during the demo. All content is loaded from prepared JSON files. The “streaming” is timed setTimeout calls revealing pre-recorded data. This is a deliberate constraint: hackathon stages are not where you debug API keys.
+## Required Repo Layout
 
-## Two-tier strategy
+The repository root is the project root. Bob should create any missing directories and support files from this spec during bootstrap.
 
-**Tier 2 (primary target):** Includes a steady-state gain matrix from the TEP simulator (tep2py or equivalent), used by the verifier to compute Relative Gain Array (RGA) and reject pairings with bad RGA elements. Stronger demo.
 
-**Tier 1 (fallback):** Skips the simulator entirely. Verifier uses only structural rules (degrees of freedom, mass balance, MV uniqueness, inventory loop outflow handles). Defensible demo, less impressive.
+Rules:
+- Keep this layout as the primary app architecture.
+- Add only minimal support files or directories that are required for generator control, references, Bob judging evidence, tests, and PR workflow.
+- Do not nest the app under another top-level folder.
+- Do not include `tep_hackathon_playbook.md` in the repository.
+- The raw dataset may exist beside the repository on the local machine, but not inside the repository.
 
-**Decision rule:** Attempt tep2py installation in the first 60 minutes of work. If it installs cleanly, proceed with Tier 2. If installation fails after one debug attempt, hard stop, switch to Tier 1, do not retry. Time-box is non-negotiable.
+## Required App Surface
 
-## Architecture (three layers)
+- `app.py` remains the main judge-facing dashboard and must implement this spec's core story: flowsheet, time series, callout, replay controls, and model-vs-SPC narrative.
+- `app.py` may include a secondary `Training Challenge` mode, but `Copilot` remains the default judge-facing flow.
+- Any training interaction in v1 must be single-step, replay-based, and advisory rather than a live simulator.
+- Support pages are allowed later for development and review, such as Data QA, Feature QA, and Model Results.
+- Support pages must not replace the main dashboard or change the product story.
+- The app must degrade gracefully when local data or model artifacts are missing.
 
-The whole point of the project is the separation of concerns. Each layer is auditable on its own.
+## Sprint Roadmap
 
-1. **Proposer (LLM).** Reads variables and objectives. Emits structured pairings as JSON. Reasoning per pairing is required output, not optional.
-1. **Verifier (deterministic Python).** Checks proposals against engineering rules. Returns pass/fail per loop with reasons. The LLM does not run the verifier; the verifier is plain code.
-1. **Renderer (deterministic JavaScript/SVG).** Takes pairings JSON, draws P&ID with hardcoded unit positions. Same renderer used for agent’s proposal and Ricker baseline.
+Bob must create sprint contract files under `sprints/` from this roadmap if they are missing. Each sprint file should include: metadata, activation preconditions, product goal, what will be built, explicit out-of-scope items, done criteria, test plan, pass/fail thresholds, allowed file scope, and guardrails.
 
-This separation must survive into the demo. If a judge asks “did the LLM draw the diagram,” the answer is no, the LLM produced structured pairings, the renderer drew the diagram from a deterministic template. This is the correct answer and a feature, not a limitation.
+### Sprint 000: Bootstrap Files Only
 
-## Critical: LLM does, user reviews
+- Goal: create the controlled repo shape and sprint contract stack before app code exists.
+- Allowed files: `spec.md`, `SKILL.md`, `README.md`, `requirements.txt`, `.gitignore`, `.github/pull_request_template.md`, `references/`, `bob_sessions/README.md`, `sprints/`, `tests/.gitkeep`, `models_trained/.gitkeep`, and empty app directories with `.gitkeep` files if needed.
+- Must create sprint contracts for Sprints 000 through 008 from this roadmap.
+- Must not create `app.py` or app modules.
+- Done when the repo has the required structure, docs, ignore rules, citation metadata, Bob evidence folder, PR template, and sprint files.
 
-The user (call her the Engineer) is a 14-year process operations engineer. She is not coding this herself. The LLM (you) does the building. The Engineer reviews.
+## Replay-Based Training Constraint
 
-Every artifact you produce must come with a plain-language explanation of what it does, what its inputs and outputs are, and one sentence of the form “if this is wrong, the symptom would be X.” The Engineer reads explanations, not source code. She sanity-checks by running the symptom test or by spot-checking domain logic against her process knowledge.
+- The Rieth dataset provides fixed replay trajectories; operator choices in v1 do not change future plant state.
+- If a `Training Challenge` is implemented, it must pause at a selected replay point, collect a first diagnostic or control move, score that move against a local curated rubric, and then continue the same replay unchanged.
+- Any cost implication shown in training mode is advisory and derived from the replay and cost model; it is not proof that the operator optimized plant behavior.
+- The app must not claim to be a live simulator, a closed-loop trainer, or a control optimizer unless a controllable simulator is added later.
 
-You must not advance to the next sprint task without her explicit approval. Approval means she has read the explanation and run at least one sanity check.
+## Shared Footer Rule
 
-The Engineer’s domain knowledge is the bottleneck of the project. Her time is best spent reviewing your pairings reasoning (Sprint 1.4) and verifying P&ID correctness (Sprint 2.3). Do not waste her time asking her to read code.
+- Every page in the software must render the same shared references footer.
+- The footer must include at minimum:
+  - dataset citation and DOI
+  - benchmark paper citation and DOI
+  - provenance note stating that figures in the app are redrawn or generated from cited data and that original paper pages are not reproduced
+- Footer content must be loaded from local files in `references/`, not hardcoded separately on each page.
+- The footer rule applies to the main dashboard and any later support pages.
 
-## Inputs the project depends on
+## Data Policy
 
-These exist outside the project. The user has access to them and will provide them when needed.
+- Raw `.RData` dataset files are local-only and must not be committed to GitHub.
+- The repo must ignore dataset storage locations such as `data_raw/`, `dataverse_files/`, and `*.RData`.
+- The app must read the dataset from a local ignored location.
+- If the dataset is missing, the app must show a friendly setup message rather than a traceback.
+- Small synthetic fixtures may be added later for tests, but the published Rieth dataset stays out of the repo.
+- Do not use client data, personal information, social-media data, company-confidential data, or any data without permission from the data owner.
 
-- Downs and Vogel 1993, “A plant-wide industrial process control problem,” Computers and Chemical Engineering. Source paper. Defines the process, variables, objectives.
-- Ricker 1996, “Decentralized control of the Tennessee Eastman challenge process,” Journal of Process Control. The answer key for the comparison.
-- The 41 XMEAS measurement variables (id, name, units, location).
-- The 12 XMV manipulated variables (id, name, units, range).
-- The 5 control objectives stated in the original paper.
+## IBM Platform Policy
 
-Do not redistribute the paper text. Treat the papers as read-only references. Reproduce only the variable tables and objectives into project JSON.
+- IBM Bob IDE is required for the hackathon workflow and judging evidence.
+- Bob task-session exports belong in `bob_sessions/` and should be reviewed for secrets before commit.
+- IBM Cloud credentials, IBM API keys, watsonx access tokens, and `.streamlit/secrets.toml` must never be committed.
+- If optional watsonx.ai artifacts are added later, do not use out-of-scope hackathon features or models identified in the guide.
+- The app must not require a live watsonx or IBM Cloud account to run the default local demo.
 
-## Required artifacts (by end of project)
+## Cross-Platform Rule
 
-```
-/
-  spec.md                  (this file)
-  sprints.md               (you generate, user approves)
-  /data
-    variables.json         (41 XMEAS + 12 XMV)
-    objectives.md          (paraphrased, not copied)
-    ricker_baseline.json   (11 published pairings, ground truth)
-    agent_run.json         (LLM proposer output, version-tagged)
-    verifier_report.json   (pass/fail per loop)
-    comparison.json        (agent vs ricker)
-    gains.json             (Tier 2 only; steady-state gain matrix)
-  /verifier
-    verifier.py            (deterministic checks)
-    rules.md               (plain-English description of each rule)
-  /renderer
-    symbols.jsx            (5 SVG primitives: vessel, valve, controller, instrument line, process line)
-    layout.jsx             (hardcoded TEP unit positions)
-    render.jsx             (pairings JSON to SVG)
-  /app
-    App.jsx                (replay UI, single-page)
-    timing.js              (setTimeout sequence)
-    package.json           (Vite + React + Tailwind core utilities only)
-  /docs
-    pitch_script.md        (60-second narration)
-    explanations.md        (one section per artifact, plain language)
-```
+- macOS and Windows must both work with Python `3.11`, `venv`, and `pip`.
+- Avoid Docker, Conda, Makefiles, Linux-only shell assumptions, and hardcoded absolute paths.
+- Setup and run steps must be expressible in both Terminal and PowerShell.
+- File paths and local environment assumptions must be platform-safe.
 
-## Constraints and non-negotiables
+## GitHub PR Rule
 
-- **No live API calls in the demo.** All LLM output is captured beforehand into `agent_run.json` and replayed.
-- **No backend.** Static site. Vite build, deployable to Cloudflare Pages or Vercel.
-- **No browser storage APIs.** No localStorage, sessionStorage. State lives in React state during the session.
-- **No auto-layout for the P&ID.** Hardcode unit positions. Auto-layout will eat the day.
-- **No paper text in the deliverable.** Reproduce only variable tables and objectives, paraphrased where the original would be copied.
-- **No premature polish.** Ship normal effort with frontend skills by end of Day 1. Polish on Day 2.
-- **Demo total runtime: 35 to 60 seconds on auto-play.** Longer loses judges.
-- **The replay must include a visible “recorded run” label somewhere.** Not hidden, not loud. Honest.
+- Work one sprint at a time.
+- Use one branch per sprint and one PR per sprint.
+- Each PR must include:
+  - goal
+  - changed behavior
+  - local run steps
+  - human verification checklist
+  - references touched
+  - Bob session evidence produced or not applicable yet
+  - known limitations
+- The sprint contract for the active sprint is the implementation boundary for that PR.
 
-## Sprint structure (use this when generating sprints.md)
+## Generator Boundaries
 
-Generate two days of sprints. Each sprint is one task. Each task has the following fields:
+- The generator must obey `spec.md`.
+- If sprint files are missing, the generator must first create the repo structure and sprint contracts from this spec, then stop for human review.
+- After sprint files exist, the generator must obey the active sprint file.
+- The generator must not create app code outside the current sprint scope.
+- The generator must not introduce repo shape drift from this spec without explicit approval in `spec.md` or the active sprint contract.
+- The generator must not commit dataset files or copied copyrighted article content.
+- The generator must not invent closed-loop simulator behavior or control-optimization claims from replay-only data.
+- Sprint 000 is documentation/bootstrap only. No app code modules are to be created in this sprint.
 
-- **ID** (e.g., `1.1`, `1.2`, `2.1`)
-- **Title** (one short sentence)
-- **Time-box** (in minutes; total Day 1 should be 6-8 hours, Day 2 should be 6-8 hours)
-- **LLM does** (3-5 bullet points; what you will produce)
-- **Engineer reviews** (3-5 bullet points; what she checks before approving)
-- **Output artifact** (filename or filenames produced)
-- **Definition of done** (one sentence; the sanity check that confirms the task is finished)
+## Human Responsibilities
 
-Day 1 covers: paper ingestion, variable extraction, baseline encoding, optional tep2py install, proposer prompt design, agent run with iteration, verifier construction, comparison generation. End of Day 1 should produce all six (or seven, with gains) JSON files clean.
+- Create and own the GitHub repo.
+- Use the hackathon-provisioned IBM Bob IDE account for project tasks that will be submitted for judging.
+- Place the local source materials at repo root.
+- Keep the raw dataset local and out of Git.
+- Export relevant Bob IDE task-history markdown files and task-session consumption summary screenshots into `bob_sessions/`.
+- Start each sprint intentionally and review the resulting files.
+- Run visible verification steps and review draft PRs.
+- Reject scope creep and merge only after the checklist passes.
+- Own the final README narrative, screenshots, demo flow, and submission packaging.
 
-Day 2 covers: SVG symbol vocabulary, hardcoded TEP layout, P&ID rendering function, replay UI extension to include diagrams, greyed-out Phase 4 panel, speed multiplier, pitch script, dry runs, deployment.
+## Acceptance Criteria
 
-Do not collapse multiple tasks into one. Do not skip the time-box on tep2py (Sprint 1.2). Do not start building until the Engineer approves sprints.md.
+- Repo root stays spec-aligned and not nested under another app folder.
+- `app.py` remains reserved as the future main dashboard entrypoint.
+- Every later page must use the shared references footer.
+- The dataset policy is explicit and enforceable through `.gitignore` and the docs.
+- macOS and Windows compatibility is a stated product requirement from the start.
+- The generator has a clear operating contract and sprint boundary before code generation begins.
+- The final repo contains `bob_sessions/` with relevant IBM Bob IDE task evidence for judging.
+- The README frames the artifact as Bob-assisted delivery of a process copilot, not just standalone data science.
+- Any operator-training interaction is explicitly described as replay-based and not as a plant simulator.
+- The main judge-facing story remains earlier fault detection first, with training challenge behavior secondary.
 
-## Drop list (cut top to bottom if behind schedule)
+## Out Of Scope
 
-1. Speed multiplier on replay.
-1. Side-by-side diagram view (show one, then swap).
-1. RGA in verifier (drops to Tier 1).
-1. Custom SVG P&ID (drop to Mermaid flowchart).
-1. Diagrams entirely (comparison table is still defensible).
-
-## Risk register
-
-- **High:** LLM ships subtly wrong code that the Engineer does not catch because she reads explanations, not code. Mitigation: every non-trivial function carries a one-line “if wrong, symptom is X” comment. Engineer runs the symptom test.
-- **High:** tep2py install eats hours. Mitigation: 60-minute time-box on Sprint 1.2, no negotiation.
-- **High:** Agent reasoning sounds confident but is engineering-wrong. Mitigation: Sprint 1.4 review by Engineer is the bottleneck of the project. Read every reasoning line.
-- **Medium:** SVG layout produces visual mess. Mitigation: hardcode positions, fall back to Mermaid.
-- **Medium:** Replay JSON mismatches latest agent run because of caching. Mitigation: in Sprint 2.4 final check, open JSON and replay side by side.
-
-## The single rule
-
-Code that the Engineer has not understood is code that will betray the demo on stage. Do not advance any task to “done” until the Engineer has read your explanation and run at least one sanity check. If she has not approved, the task is not done.” until the Engineer has read your explanation and run at least one sanity check. If she has not approved, the task is not done.
+- Uploading the full Rieth dataset to GitHub
+- Committing IBM Cloud credentials, Bob account secrets, API keys, or watsonx access tokens
+- Fabricating or replacing Bob IDE session exports with hand-written summaries
+- Reproducing copyrighted paper figures or article pages
+- Cloud deployment
+- Dockerization
+- Conda-specific workflows
+- Auto-merge or unattended PR approval
+- Building application modules during Sprint 000
+- A live closed-loop operator simulator built from the Rieth replay dataset alone
+- Causal proof that a user action minimized plant cost
+- Claims that user-entered control moves change the future replay trajectory in v1
+- Claims that the app optimizes controls directly from user actions in v1
