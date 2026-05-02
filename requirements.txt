@@ -1,6 +1,11 @@
 # TEP Copilot Dependencies
 # Dependencies will be added in implementation sprints
 
+# Sprint 1.4: LLM Proposer
+anthropic>=0.97.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+
 # Sprint 001: Data Loading
 # pyreadr
 # pandas

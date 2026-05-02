@@ -1,0 +1,74 @@
+{
+  "model": "claude-sonnet-4-20250514",
+  "timestamp": "2026-05-02T07:59:47.291299Z",
+  "prompt_version": "v1",
+  "pairings": [
+    {
+      "mv": "XMV(10)",
+      "cv": "XMEAS(9)",
+      "reasoning": "Reactor temperature control via cooling water flow is critical for safety and selectivity. The exothermic reactions generate significant heat, and temperature directly affects reaction rates and product distribution. This is a fast, responsive pairing with clear process gain.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(11)",
+      "cv": "XMEAS(8)",
+      "reasoning": "Reactor level must be controlled via condenser cooling water since there's no direct liquid outlet. Increasing condenser cooling increases condensation rate, reducing vapor carryover and allowing liquid level to build. This is the only viable option for reactor inventory control.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(6)",
+      "cv": "XMEAS(7)",
+      "reasoning": "Reactor pressure control via purge valve provides safety protection against the 3000 kPa limit. Opening the purge removes material from the system, reducing pressure. This is a critical safety loop with fast dynamics and clear directional control.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(7)",
+      "cv": "XMEAS(12)",
+      "reasoning": "Separator level control using the downstream liquid flow follows inventory control best practices. This maintains material balance between separator and stripper while providing responsive level control through direct liquid outflow manipulation.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(8)",
+      "cv": "XMEAS(15)",
+      "reasoning": "Stripper level control via product flow maintains inventory in the stripper column. Using the outflow handle provides stable level control and ensures proper liquid residence time for separation. This follows downstream inventory control strategy.",
+      "confidence": "medium"
+    },
+    {
+      "mv": "XMV(9)",
+      "cv": "XMEAS(11)",
+      "reasoning": "Separator temperature control via stripper steam valve affects the vapor-liquid equilibrium in the separator. Steam rate influences the overall column heat balance and separation efficiency, providing indirect but effective temperature control.",
+      "confidence": "medium"
+    },
+    {
+      "mv": "XMV(1)",
+      "cv": "XMEAS(17)",
+      "reasoning": "Production rate control via D feed flow provides direct throughput manipulation. Component D is a key reactant, and its feed rate strongly influences overall production rate. This pairing allows production targets to be met while maintaining feed ratio flexibility.",
+      "confidence": "medium"
+    },
+    {
+      "mv": "XMV(4)",
+      "cv": "XMEAS(23)",
+      "reasoning": "Component A ratio in reactor feed controlled by A+C feed flow maintains proper stoichiometry. This stream has the largest flow capacity and directly affects reactant ratios, which are critical for product quality and preventing reactant accumulation.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(2)",
+      "cv": "XMEAS(38)",
+      "reasoning": "Component E in product controlled by E feed flow provides direct composition control. E feed rate directly affects the E content in the final product, and this pairing has strong process gain for product quality specification.",
+      "confidence": "high"
+    },
+    {
+      "mv": "XMV(3)",
+      "cv": "XMEAS(40)",
+      "reasoning": "Component G in product controlled by A feed flow leverages the reaction stoichiometry where A participates in G formation. This provides product quality control while using the smaller A feed stream to minimize upstream disturbances.",
+      "confidence": "medium"
+    },
+    {
+      "mv": "XMV(12)",
+      "cv": "XMEAS(22)",
+      "reasoning": "Component D in reactor feed controlled by agitator speed affects mixing and residence time distribution, which influences reactant conversion patterns. Better mixing can help maintain consistent D utilization and prevent local concentration variations.",
+      "confidence": "low"
+    }
+  ],
+  "full_response": "```json\n[\n  {\n    \"mv\": \"XMV(10)\",\n    \"cv\": \"XMEAS(9)\",\n    \"reasoning\": \"Reactor temperature control via cooling water flow is critical for safety and selectivity. The exothermic reactions generate significant heat, and temperature directly affects reaction rates and product distribution. This is a fast, responsive pairing with clear process gain.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(11)\",\n    \"cv\": \"XMEAS(8)\",\n    \"reasoning\": \"Reactor level must be controlled via condenser cooling water since there's no direct liquid outlet. Increasing condenser cooling increases condensation rate, reducing vapor carryover and allowing liquid level to build. This is the only viable option for reactor inventory control.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(6)\",\n    \"cv\": \"XMEAS(7)\",\n    \"reasoning\": \"Reactor pressure control via purge valve provides safety protection against the 3000 kPa limit. Opening the purge removes material from the system, reducing pressure. This is a critical safety loop with fast dynamics and clear directional control.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(7)\",\n    \"cv\": \"XMEAS(12)\",\n    \"reasoning\": \"Separator level control using the downstream liquid flow follows inventory control best practices. This maintains material balance between separator and stripper while providing responsive level control through direct liquid outflow manipulation.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(8)\",\n    \"cv\": \"XMEAS(15)\",\n    \"reasoning\": \"Stripper level control via product flow maintains inventory in the stripper column. Using the outflow handle provides stable level control and ensures proper liquid residence time for separation. This follows downstream inventory control strategy.\",\n    \"confidence\": \"medium\"\n  },\n  {\n    \"mv\": \"XMV(9)\",\n    \"cv\": \"XMEAS(11)\",\n    \"reasoning\": \"Separator temperature control via stripper steam valve affects the vapor-liquid equilibrium in the separator. Steam rate influences the overall column heat balance and separation efficiency, providing indirect but effective temperature control.\",\n    \"confidence\": \"medium\"\n  },\n  {\n    \"mv\": \"XMV(1)\",\n    \"cv\": \"XMEAS(17)\",\n    \"reasoning\": \"Production rate control via D feed flow provides direct throughput manipulation. Component D is a key reactant, and its feed rate strongly influences overall production rate. This pairing allows production targets to be met while maintaining feed ratio flexibility.\",\n    \"confidence\": \"medium\"\n  },\n  {\n    \"mv\": \"XMV(4)\",\n    \"cv\": \"XMEAS(23)\",\n    \"reasoning\": \"Component A ratio in reactor feed controlled by A+C feed flow maintains proper stoichiometry. This stream has the largest flow capacity and directly affects reactant ratios, which are critical for product quality and preventing reactant accumulation.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(2)\",\n    \"cv\": \"XMEAS(38)\",\n    \"reasoning\": \"Component E in product controlled by E feed flow provides direct composition control. E feed rate directly affects the E content in the final product, and this pairing has strong process gain for product quality specification.\",\n    \"confidence\": \"high\"\n  },\n  {\n    \"mv\": \"XMV(3)\",\n    \"cv\": \"XMEAS(40)\",\n    \"reasoning\": \"Component G in product controlled by A feed flow leverages the reaction stoichiometry where A participates in G formation. This provides product quality control while using the smaller A feed stream to minimize upstream disturbances.\",\n    \"confidence\": \"medium\"\n  },\n  {\n    \"mv\": \"XMV(12)\",\n    \"cv\": \"XMEAS(22)\",\n    \"reasoning\": \"Component D in reactor feed controlled by agitator speed affects mixing and residence time distribution, which influences reactant conversion patterns. Better mixing can help maintain consistent D utilization and prevent local concentration variations.\",\n    \"confidence\": \"low\"\n  }\n]\n```"
+}
