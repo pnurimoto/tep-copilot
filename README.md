@@ -10,21 +10,21 @@ Implemented now:
 - Control objectives and Ricker 1996 baseline pairing data in `data/objectives.md` and `data/ricker_baseline.json`.
 - LLM proposer prompt and generated agent outputs in `data/proposer_prompt_v1.txt`, `data/agent_run.json`, and `data/agent_run_3.json`.
 - Deterministic Python verifier in `verifier/verifier.py` with tests in `tests/test_verifier.py`.
-- SVG/React symbol primitives in `renderer/symbols.jsx` plus a renderer smoke test in `tests/run_all.sh`.
+- SVG/React symbol primitives and P&ID renderer modules in `renderer/`.
+- Recorded replay UI in `app/` with a Vite React surface for the Sprint 2.4 demo.
 - Bob IDE session evidence in `bob_sessions/`.
 
 Not implemented yet:
 
-- No runnable browser UI or app interface is present.
-- No `app.py`, `app/`, `index.html`, or Vite setup exists in the tracked repo.
-- No full P&ID layout/rendering layer exists yet beyond isolated SVG symbols.
+- No `app.py` dashboard entrypoint is present.
+- No backend, live API call, or simulator-in-the-loop mode is present.
 
 ## Repository Map
 
 - `data/` - source-grounded variables, objectives, baseline pairings, agent outputs, and verifier report artifacts.
 - `scripts/run_proposer.py` - optional API-backed proposer runner. Requires either `BOB_IBM_API_KEY` or `ANTHROPIC_API_KEY` in the environment or `.env`.
 - `verifier/` - deterministic engineering-rule checks for MV uniqueness, inventory loops, degrees of freedom, and mass-balance closure.
-- `renderer/` - current SVG symbol vocabulary. This is renderer groundwork, not a complete UI.
+- `renderer/` - SVG symbol vocabulary, hardcoded TEP layout, and deterministic P&ID rendering.
 - `tests/` - Python validation tests and a shell-based renderer smoke test.
 - `docs/` and `sprints/` - design notes, sprint contracts, and implementation plan.
 - `bob_sessions/` - exported Bob IDE evidence for hackathon judging.
@@ -61,6 +61,16 @@ python3 tests/test_verifier.py
 bash tests/run_all.sh
 ```
 
+Run the recorded browser replay:
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+Open the local Vite URL, click `Run Agent`, and watch the recorded 60-second replay.
+
 Generate a verifier report:
 
 ```bash
@@ -71,11 +81,11 @@ This rewrites `data/verifier_report.json` from `data/agent_run.json` and `data/r
 
 ## UI Status
 
-There is no user-facing interface yet. The project only has reusable SVG symbol components and a smoke test that renders a static preview SVG to `/private/tmp/tep-symbols-preview.svg`. The planned interface work is described in the Sprint 2 files, especially `sprints/sprint-2.2-tep-layout.md`, `sprints/sprint-2.3-pid-renderer.md`, and `sprints/sprint-2.4-replay-ui.md`.
+The `app/` folder contains the judge-facing recorded replay UI. It uses local artifacts only: `data/agent_run.json`, `data/verifier_report.json`, `data/comparison.json`, `data/ricker_baseline.json`, and the deterministic renderer in `renderer/`. The UI labels the run as recorded and does not claim live simulation or optimization.
 
 ## Current Limitations
 
-- The renderer is a symbol vocabulary only; it does not yet render complete plant layouts or loop connections.
+- The browser UI is a recorded/static replay and does not execute a live LLM or simulator.
 - The proposer runner requires an API key and is not part of the offline demo path.
 - The verifier checks structural rules only. It does not perform dynamic simulation or Relative Gain Array analysis.
 - The Ricker baseline intentionally contains cascade/duplicate MV structure that the simple decentralized uniqueness rule marks as failing.

@@ -1,0 +1,23 @@
+{
+  "name": "tep-replay-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Recorded TEP control-structure replay UI for Sprint 2.4.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node timing.test.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.19"
+  }
+}

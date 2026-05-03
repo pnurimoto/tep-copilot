@@ -1,5 +1,6 @@
 # JavaScript
 node_modules/
+dist/
 
 # Python
 __pycache__/
@@ -14,7 +15,10 @@ ENV/
 .env
 
 # References
-references/
+references/*
+!references/
+!references/.gitkeep
+!references/sources.json
 
 # Dataset files (NEVER commit)
 *.RData
@@ -26,9 +30,6 @@ datasets/*.RData
 models_trained/*.pkl
 models_trained/*.joblib
 models_trained/*.h5
-
-#References
-references/
 
 # Secrets (NEVER commit)
 .env

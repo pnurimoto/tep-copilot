@@ -70,6 +70,8 @@ const attrNames = {
   strokeLinecap: "stroke-linecap",
   strokeDasharray: "stroke-dasharray",
   vectorEffect: "vector-effect",
+  markerEnd: "marker-end",
+  fillOpacity: "fill-opacity",
   textAnchor: "text-anchor",
   fontSize: "font-size",
   fontWeight: "font-weight",
@@ -290,6 +292,8 @@ const attrNames = {
   strokeLinecap: "stroke-linecap",
   strokeDasharray: "stroke-dasharray",
   vectorEffect: "vector-effect",
+  markerEnd: "marker-end",
+  fillOpacity: "fill-opacity",
   textAnchor: "text-anchor",
   fontSize: "font-size",
   fontWeight: "font-weight",
@@ -427,6 +431,10 @@ fs.writeFileSync("/private/tmp/tep-pid-ricker.svg", rickerSvg);
 fs.writeFileSync("/private/tmp/tep-pid-side-by-side.svg", sideBySideSvg);
 console.log("P&ID renderer smoke test rendered /private/tmp/tep-pid-agent.svg, /private/tmp/tep-pid-ricker.svg, and /private/tmp/tep-pid-side-by-side.svg");
 NODE
+
+echo ""
+echo "Running Sprint 2.4 replay timing contract test..."
+node "$ROOT_DIR/app/timing.test.mjs"
 
 echo ""
 echo "All tests passed ✓"

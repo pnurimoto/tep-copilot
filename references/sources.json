@@ -1,0 +1,20 @@
+{
+  "provenance": "Figures in this app are redrawn SVG renderings or generated from local project data. Original paper pages and figures are not reproduced.",
+  "items": [
+    {
+      "label": "Benchmark paper",
+      "citation": "Downs and Vogel (1993), A plant-wide industrial process control problem, Computers & Chemical Engineering.",
+      "doi": "10.1016/0098-1354(93)80018-I"
+    },
+    {
+      "label": "Dataset",
+      "citation": "Rieth et al. (2017), Additional Tennessee Eastman Process Simulation Data for Anomaly Detection Evaluation, Harvard Dataverse.",
+      "doi": "10.7910/DVN/6C3JR1"
+    },
+    {
+      "label": "Baseline",
+      "citation": "Ricker (1996), Decentralized control of the Tennessee Eastman Challenge Process, Journal of Process Control 6(4):205-221.",
+      "doi": ""
+    }
+  ]
+}
