@@ -293,7 +293,7 @@ function preparePromptTokens(promptText) {
   const normalized = String(promptText || fallback)
     .replace(/\s+/g, " ")
     .trim();
-  return normalized.split(" ").slice(0, 185);
+  return normalized.split(" ");
 }
 
 function spread(startAt, durationMs, index, count) {
