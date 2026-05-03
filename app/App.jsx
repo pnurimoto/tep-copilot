@@ -6,7 +6,6 @@ import verifierReport from "../data/verifier_report.json";
 import variables from "../data/variables.json";
 import promptText from "../data/proposer_prompt_v1.txt?raw";
 import references from "../references/sources.json";
-import tepFlowsheet from "../assets/tep_flowsheet.svg";
 import { renderPID } from "../renderer/render.jsx";
 import {
   REPLAY_PHASES,
@@ -119,7 +118,7 @@ export default function App() {
       </header>
 
       {activePage === "about" ? (
-        <AboutPage />
+        <AboutPage pairings={pairings} />
       ) : (
         <main className="workspace">
           <section className="control-strip" aria-label="Replay status">
@@ -176,11 +175,11 @@ export default function App() {
   );
 }
 
-function AboutPage() {
+function AboutPage({ pairings }) {
   const aboutMetrics = [
     { value: variables.measurements.length, label: "measured variables" },
     { value: variables.manipulated.length, label: "manipulated variables" },
-    { value: agentRun.pairings.length, label: "control loops reviewed" },
+    { value: pairings.length, label: "control loops reviewed" },
   ];
 
   return (
@@ -204,8 +203,13 @@ function AboutPage() {
 
         <div className="about-process-panel" aria-label="TEP process summary">
           <figure className="about-flowsheet">
-            <img src={tepFlowsheet} alt="Redrawn Tennessee Eastman Process flowsheet" />
-            <figcaption>Local redrawn process map used by the replay and documentation.</figcaption>
+            {renderPID(pairings, true, {
+              title: "Agent Run",
+              subtitle: "Same P&ID figure used in the replay comparison.",
+              idPrefix: "about-agent-pid",
+              ariaLabel: "Agent proposal TEP P and ID rendering from the replay",
+            })}
+            <figcaption>Generated P&ID figure used by the replay comparison.</figcaption>
           </figure>
           <div className="about-unit-row" aria-label="Primary TEP units">
             <span>Reactor</span>
