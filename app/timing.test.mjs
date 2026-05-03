@@ -66,6 +66,17 @@ assert.equal(pairingSnapshot.visiblePairingCount, 11);
 assert.ok(pairingSnapshot.promptText.includes("six"));
 assert.equal(Object.keys(pairingSnapshot.checkedStatuses).length, 0);
 
+const longPrompt = Array.from({ length: 220 }, (_, index) => `word-${index + 1}`).join(" ");
+const promptSnapshot = buildReplaySnapshotAt({
+  elapsedMs: phaseCheckpointMs("prompt"),
+  phaseId: "prompt",
+  promptText: longPrompt,
+  pairings,
+  comparisonDetails,
+});
+
+assert.ok(promptSnapshot.promptText.includes("word-220"));
+
 const pidSnapshot = buildReplaySnapshotAt({
   elapsedMs: phaseCheckpointMs("pid"),
   phaseId: "pid",
