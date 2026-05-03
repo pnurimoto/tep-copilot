@@ -10,91 +10,107 @@ const UTILITY_BLUE = "#2e617f";
 const STEAM = "#8a3d22";
 const RULE = "#d7d7d7";
 const SIGNAL = "#6f6f6f";
+const PROCESS_ORIGIN_Y = 58;
 const PID_CANVAS = {
-  width: 1320,
-  height: 900,
+  width: 1074,
+  height: 1120,
 };
 const FLOW_SHEET = {
-  x: 24,
-  y: 78,
-  width: 1272,
-  height: 758,
+  x: 0,
+  y: 0,
+  width: 1074,
+  height: 938,
 };
+const REFERENCE_PID_ASSET = "tep_pid_reference_trace.png";
 
-const VALVE_SIZE = { width: 28, height: 20 };
-const CONTROLLER_RADIUS = 22;
-const VALVE_RADIUS = 18;
-const CONTROLLER_TO_VALVE_GAP = 24;
+const VALVE_SIZE = { width: 20, height: 14 };
+const CONTROLLER_RADIUS = 15;
+const VALVE_RADIUS = 12;
+const CONTROLLER_TO_VALVE_GAP = 15;
 const TAG_FONT = "Avenir Next, Segoe UI, sans-serif";
-const TAG_FONT_SIZE = 10;
+const TAG_FONT_SIZE = 9;
 
-const DEFAULT_VALVE_LABEL = { dx: 0, dy: 35, anchor: "middle" };
-const DEFAULT_MEASUREMENT_LABEL = { dx: 0, dy: 37, anchor: "middle" };
+const DEFAULT_VALVE_LABEL = { dx: 0, dy: 29, anchor: "middle" };
+const DEFAULT_MEASUREMENT_LABEL = { dx: 24, dy: 4, anchor: "start" };
 const VALVE_LABEL_OFFSETS = {
-  "XMV(1)": { dx: -34, dy: 4, anchor: "end" },
-  "XMV(2)": { dx: 34, dy: 4, anchor: "start" },
-  "XMV(3)": { dx: 34, dy: 4, anchor: "start" },
-  "XMV(8)": { dx: -4, dy: 58, anchor: "end" },
-  "XMV(10)": { dx: 10, dy: 43, anchor: "start" },
+  "XMV(1)": { dx: 0, dy: 27, anchor: "middle" },
+  "XMV(2)": { dx: 0, dy: 27, anchor: "middle" },
+  "XMV(3)": { dx: 0, dy: 27, anchor: "middle" },
+  "XMV(4)": { dx: 0, dy: 27, anchor: "middle" },
+  "XMV(5)": { dx: 0, dy: -18, anchor: "middle" },
+  "XMV(6)": { dx: 0, dy: 29, anchor: "middle" },
+  "XMV(8)": { dx: 0, dy: 30, anchor: "middle" },
+  "XMV(9)": { dx: 30, dy: 4, anchor: "start" },
+  "XMV(10)": { dx: 0, dy: 28, anchor: "middle" },
+  "XMV(11)": { dx: 31, dy: 4, anchor: "start" },
+  "XMV(12)": { dx: 33, dy: 4, anchor: "start" },
 };
 const MEASUREMENT_LABEL_OFFSETS = {
-  "XMEAS(7)": { dx: 28, dy: 4, anchor: "start" },
-  "XMEAS(8)": { dx: 28, dy: 4, anchor: "start" },
-  "XMEAS(9)": { dx: 28, dy: 4, anchor: "start" },
-  "XMEAS(11)": { dx: 30, dy: 4, anchor: "start" },
-  "XMEAS(12)": { dx: 30, dy: 4, anchor: "start" },
-  "XMEAS(15)": { dx: 30, dy: 4, anchor: "start" },
-  "XMEAS(17)": { dx: -28, dy: 4, anchor: "end" },
-  "XMEAS(22)": { dx: 28, dy: 4, anchor: "start" },
-  "XMEAS(23)": { dx: 28, dy: 4, anchor: "start" },
-  "XMEAS(38)": { dx: -28, dy: 4, anchor: "end" },
-  "XMEAS(40)": { dx: -28, dy: 4, anchor: "end" },
+  "XMEAS(7)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(8)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(9)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(11)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(12)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(15)": { dx: -27, dy: 4, anchor: "end" },
+  "XMEAS(17)": { dx: 0, dy: -24, anchor: "middle" },
+  "XMEAS(22)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(23)": { dx: 27, dy: 4, anchor: "start" },
+  "XMEAS(38)": { dx: -29, dy: 4, anchor: "end" },
+  "XMEAS(40)": { dx: -29, dy: 4, anchor: "end" },
 };
-const CONTROLLER_OFFSETS = {};
+const CONTROLLER_OFFSETS = {
+  "XMV(1)": { dx: -18, dy: 0 },
+  "XMV(2)": { dx: 18, dy: 0 },
+  "XMV(6)": { dx: 0, dy: -18 },
+  "XMV(8)": { dx: 0, dy: -4 },
+  "XMV(9)": { dx: 28, dy: 0 },
+  "XMV(10)": { dx: -26, dy: 0 },
+  "XMV(11)": { dx: 28, dy: -4 },
+  "XMV(12)": { dx: 36, dy: 0 },
+};
 
 const CONTROL_POINTS = {
   valves: {
-    "XMV(1)": { x: 160, y: 280, label: "D feed valve", orientation: "horizontal" },
-    "XMV(2)": { x: 160, y: 400, label: "E feed valve", orientation: "horizontal" },
-    "XMV(3)": { x: 160, y: 160, label: "A feed valve", orientation: "horizontal" },
-    "XMV(4)": { x: 210, y: 704, label: "A+C feed valve", orientation: "horizontal" },
-    "XMV(5)": { x: 760, y: 132, label: "Recycle valve", orientation: "horizontal" },
-    "XMV(6)": { x: 1080, y: 160, label: "Purge valve", orientation: "horizontal" },
-    "XMV(7)": { x: 780, y: 525, label: "Separator liquid valve", orientation: "horizontal" },
-    "XMV(8)": { x: 1030, y: 780, label: "Product valve", orientation: "horizontal" },
-    "XMV(9)": { x: 790, y: 760, label: "Steam valve", orientation: "horizontal" },
-    "XMV(10)": { x: 475, y: 455, label: "Reactor cooling valve", orientation: "horizontal" },
-    "XMV(11)": { x: 735, y: 205, label: "Condenser cooling valve", orientation: "horizontal" },
-    "XMV(12)": { x: 455, y: 270, label: "Agitator speed", orientation: "vertical" },
+    "XMV(1)": { x: 215, y: 322, label: "D feed valve", orientation: "horizontal" },
+    "XMV(2)": { x: 215, y: 446, label: "E feed valve", orientation: "horizontal" },
+    "XMV(3)": { x: 215, y: 198, label: "A feed valve", orientation: "horizontal" },
+    "XMV(4)": { x: 215, y: 818, label: "C feed valve", orientation: "horizontal" },
+    "XMV(5)": { x: 805, y: 151, label: "Recycle valve", orientation: "horizontal" },
+    "XMV(6)": { x: 927, y: 198, label: "Purge valve", orientation: "horizontal" },
+    "XMV(7)": { x: 753, y: 482, label: "Separator liquid valve", orientation: "horizontal" },
+    "XMV(8)": { x: 861, y: 818, label: "Product valve", orientation: "horizontal" },
+    "XMV(9)": { x: 790, y: 704, label: "Steam valve", orientation: "horizontal" },
+    "XMV(10)": { x: 464, y: 603, label: "Reactor cooling valve", orientation: "horizontal" },
+    "XMV(11)": { x: 582, y: 292, label: "Condenser cooling valve", orientation: "horizontal" },
+    "XMV(12)": { x: 338, y: 350, label: "Agitator speed", orientation: "horizontal" },
   },
   measurements: {
-    "XMEAS(7)": { x: 450, y: 325, label: "Reactor pressure" },
-    "XMEAS(8)": { x: 450, y: 382, label: "Reactor level" },
-    "XMEAS(9)": { x: 450, y: 500, label: "Reactor temperature" },
-    "XMEAS(11)": { x: 1068, y: 370, label: "Separator temperature" },
-    "XMEAS(12)": { x: 1068, y: 425, label: "Separator level" },
-    "XMEAS(15)": { x: 770, y: 685, label: "Stripper level" },
-    "XMEAS(17)": { x: 1110, y: 780, label: "Production rate" },
-    "XMEAS(22)": { x: 215, y: 520, label: "Reactor feed D component" },
-    "XMEAS(23)": { x: 215, y: 570, label: "Reactor feed A+C composition" },
-    "XMEAS(38)": { x: 1110, y: 650, label: "Product E composition" },
-    "XMEAS(40)": { x: 1110, y: 720, label: "Product G composition" },
+    "XMEAS(7)": { x: 897, y: 274, label: "Reactor pressure" },
+    "XMEAS(8)": { x: 291, y: 410, label: "Reactor level" },
+    "XMEAS(9)": { x: 357, y: 622, label: "Reactor temperature" },
+    "XMEAS(11)": { x: 817, y: 374, label: "Separator temperature" },
+    "XMEAS(12)": { x: 812, y: 273, label: "Separator level" },
+    "XMEAS(15)": { x: 636, y: 682, label: "Stripper level" },
+    "XMEAS(17)": { x: 807, y: 790, label: "Production rate" },
+    "XMEAS(22)": { x: 552, y: 264, label: "Condenser CW outlet temperature" },
+    "XMEAS(23)": { x: 166, y: 520, label: "Reactor feed composition" },
+    "XMEAS(38)": { x: 997, y: 656, label: "Product E composition" },
+    "XMEAS(40)": { x: 997, y: 730, label: "Product G composition" },
   },
 };
 
 const STREAMS = [
-  { d: "M 88 160 L 220 160 L 220 330 L 270 330", number: "1", numberAt: { x: 202, y: 146 } },
-  { d: "M 88 280 L 205 280 L 205 365 L 270 365", number: "2", numberAt: { x: 190, y: 266 } },
-  { d: "M 88 400 L 270 400", number: "3", numberAt: { x: 176, y: 386 } },
-  { d: "M 88 704 L 540 704 L 540 735 L 590 735", number: "4", numberAt: { x: 184, y: 690 } },
-  { d: "M 760 132 L 525 132 L 525 184 L 400 184 L 400 305", number: "5", numberAt: { x: 714, y: 118 } },
-  { d: "M 335 305 L 335 260 L 525 260 L 525 203", number: "6", numberAt: { x: 348, y: 280 } },
-  { d: "M 705 203 L 800 203 L 800 338 L 870 338", number: "7", numberAt: { x: 782, y: 194 } },
-  { d: "M 940 320 L 940 205 L 915 205 L 915 171", number: "8", numberAt: { x: 952, y: 222 } },
-  { d: "M 980 143 L 1080 143 L 1080 160 L 1160 160", number: "9", numberAt: { x: 1132, y: 146 } },
-  { d: "M 940 445 L 940 525 L 780 525 L 780 650 L 720 650", number: "10", numberAt: { x: 902, y: 512 } },
-  { d: "M 655 780 L 655 820 L 1030 820 L 1030 780 L 1160 780", number: "11", numberAt: { x: 934, y: 806 } },
-  { d: "M 400 430 L 520 430 L 520 620 L 590 620", number: "12", numberAt: { x: 500, y: 416 } },
+  { d: "M 85 174 L 200 174 L 200 285 L 270 285", number: "1", numberAt: { x: 140, y: 178 } },
+  { d: "M 85 254 L 220 254 L 220 320 L 270 320", number: "2", numberAt: { x: 140, y: 258 } },
+  { d: "M 85 334 L 245 334 L 245 355 L 270 355", number: "3", numberAt: { x: 140, y: 338 } },
+  { d: "M 85 674 L 460 674 L 460 590 L 510 590", number: "4", numberAt: { x: 140, y: 678 } },
+  { d: "M 540 500 L 540 470 L 400 470 L 400 250 L 270 250", number: "5", numberAt: { x: 430, y: 474 } },
+  { d: "M 700 85 L 200 85 L 200 174", number: "6", numberAt: { x: 235, y: 289 } },
+  { d: "M 320 300 L 320 200 L 450 155", number: "7", numberAt: { x: 320, y: 249 } },
+  { d: "M 820 210 L 820 100 L 760 90", number: "8", numberAt: { x: 450, y: 89 } },
+  { d: "M 760 75 L 850 75 L 850 114 L 1135 114", number: "9", numberAt: { x: 1000, y: 118 } },
+  { d: "M 820 380 L 820 395 L 705 395 L 705 540 L 570 540", number: "10", numberAt: { x: 650, y: 544 } },
+  { d: "M 540 660 L 540 700 L 768 700 M 793 700 L 1135 674", number: "11", numberAt: { x: 950, y: 692 } },
 ];
 
 const SIGNAL_ROUTES = {
@@ -103,7 +119,7 @@ const SIGNAL_ROUTES = {
     ["v", "cy"],
   ],
   "XMV(11)->XMEAS(8)": [
-    ["h", 760],
+    ["h", 500],
     ["v", "cy"],
     ["h", "cx"],
   ],
@@ -113,78 +129,76 @@ const SIGNAL_ROUTES = {
     ["v", "cy"],
   ],
   "XMV(7)->XMEAS(12)": [
-    ["h", 1094],
-    ["v", 500],
-    ["h", "cx"],
+    ["h", 705],
     ["v", "cy"],
+    ["h", "cx"],
   ],
   "XMV(8)->XMEAS(15)": [
+    ["v", 760],
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(9)->XMEAS(11)": [
-    ["h", 1094],
+    ["h", 942],
     ["v", "cy"],
     ["h", "cx"],
   ],
   "XMV(1)->XMEAS(17)": [
-    ["v", 850],
+    ["v", 952],
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(4)->XMEAS(23)": [
-    ["h", "cx"],
+    ["h", 155],
     ["v", "cy"],
+    ["h", "cx"],
   ],
   "XMV(2)->XMEAS(38)": [
-    ["v", 825],
+    ["v", 952],
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(3)->XMEAS(40)": [
-    ["v", 860],
-    ["h", 215],
-    ["v", "cy"],
+    ["v", 974],
     ["h", "cx"],
+    ["v", "cy"],
   ],
   "XMV(12)->XMEAS(22)": [
-    ["h", 480],
-    ["v", "cy"],
+    ["v", 224],
     ["h", "cx"],
+    ["v", "cy"],
   ],
   "XMV(8)->XMEAS(17)": [
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(1)->XMEAS(40)": [
-    ["v", 860],
-    ["h", 215],
-    ["v", "cy"],
+    ["v", 974],
     ["h", "cx"],
+    ["v", "cy"],
   ],
   "XMV(3)->XMEAS(23)": [
-    ["h", 215],
+    ["h", 155],
     ["v", "cy"],
     ["h", "cx"],
   ],
   "XMV(11)->XMEAS(11)": [
-    ["h", 1094],
-    ["v", 250],
-    ["h", 760],
+    ["h", 942],
     ["v", "cy"],
     ["h", "cx"],
   ],
   "XMV(2)->XMEAS(40)": [
-    ["v", 845],
+    ["v", 974],
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(3)->XMEAS(38)": [
-    ["v", 845],
+    ["v", 952],
     ["h", "cx"],
     ["v", "cy"],
   ],
   "XMV(4)->XMEAS(22)": [
+    ["v", 952],
     ["h", "cx"],
     ["v", "cy"],
   ],
@@ -277,9 +291,11 @@ function PIDDiagram({ pairings, highlightDivergent, title, subtitle, idPrefix })
       <DiagramDefs idPrefix={idPrefix} />
       <rect width={PID_CANVAS.width} height={PID_CANVAS.height} fill={PAPER} />
       <Header title={title} subtitle={subtitle} skipped={skipped} />
-      <FlowSheet idPrefix={idPrefix} />
-      <LoopLayer loops={loops} idPrefix={idPrefix} />
-      <Legend x={32} y={868} />
+      <g transform={`translate(0 ${PROCESS_ORIGIN_Y})`}>
+        <FlowSheet idPrefix={idPrefix} />
+        <LoopLayer loops={loops} idPrefix={idPrefix} />
+      </g>
+      <Legend x={32} y={1088} />
     </g>
   );
 }
@@ -347,30 +363,19 @@ function Header({ title, subtitle, skipped }) {
 function FlowSheet({ idPrefix }) {
   return (
     <g aria-label="TEP process flowsheet">
+      <desc>
+        Reference Tennessee Eastman P&ID base showing Reactor, Condenser, Compressor, Vap/Liq Separator, Stripper,
+        analyzers, stream labels, feed valves, purge, and product lines.
+      </desc>
       <rect x={FLOW_SHEET.x} y={FLOW_SHEET.y} width={FLOW_SHEET.width} height={FLOW_SHEET.height} fill="#fff" stroke={RULE} strokeWidth="1" />
-
-      <IoBox x={32} y={146} width={56} label="A" />
-      <IoBox x={32} y={266} width={56} label="D" />
-      <IoBox x={32} y={386} width={56} label="E" />
-      <IoBox x={32} y={690} width={56} label="C" />
-      <IoBox x={1160} y={146} width={86} label="Purge" />
-      <IoBox x={1160} y={766} width={92} label="Product" />
-
-      <g fill="none" strokeLinecap="square" strokeLinejoin="miter">
-        {STREAMS.map((stream) => (
-          <StreamPath key={stream.number} stream={stream} idPrefix={idPrefix} />
-        ))}
-      </g>
-
-      <UtilityLines idPrefix={idPrefix} />
-
-      <ProcessEquipment />
-
-      <g aria-label="process valves">
-        {Object.entries(CONTROL_POINTS.valves).map(([id, point]) => (
-          <BaseValve key={id} id={id} point={point} />
-        ))}
-      </g>
+      <image
+        href={REFERENCE_PID_ASSET}
+        x={FLOW_SHEET.x}
+        y={FLOW_SHEET.y}
+        width={FLOW_SHEET.width}
+        height={FLOW_SHEET.height}
+        preserveAspectRatio="xMidYMid meet"
+      />
     </g>
   );
 }
@@ -378,13 +383,14 @@ function FlowSheet({ idPrefix }) {
 function StreamPath({ stream, idPrefix }) {
   return (
     <g>
-      <path d={stream.d} fill="none" fillOpacity="0" stroke={INK} strokeWidth="2" markerEnd={`url(#${idPrefix}-arrow)`} />
+      <path d={stream.d} fill="none" fillOpacity="0" stroke={INK} strokeWidth="1.7" markerEnd={`url(#${idPrefix}-arrow)`} />
       <text
         x={stream.numberAt.x}
         y={stream.numberAt.y}
-        fontSize="15"
+        fontSize="10"
         fontWeight="800"
         fontFamily="Avenir Next, Segoe UI, sans-serif"
+        textAnchor="middle"
         fill={INK}
       >
         {stream.number}
@@ -396,26 +402,30 @@ function StreamPath({ stream, idPrefix }) {
 function UtilityLines({ idPrefix }) {
   return (
     <g>
-      <path d="M 400 455 L 475 455" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.7" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
-      <text x="438" y="443" fontSize="11" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
+      <path d="M 220 420 L 270 420" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
+      <text x="245" y="412" fontSize="9" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
         CWS
       </text>
-      <path d="M 475 480 L 400 480" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.7" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
-      <text x="438" y="498" fontSize="11" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
+      <path d="M 370 420 L 420 420" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
+      <text x="395" y="412" fontSize="9" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
         CWR
       </text>
-      <path d="M 615 136 L 615 173" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.7" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
-      <text x="594" y="147" fontSize="11" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
+      <path d="M 550 95 L 550 135" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
+      <text x="525" y="105" fontSize="9" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
         CWS
       </text>
-      <path d="M 665 233 L 665 270" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.7" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
-      <text x="691" y="263" fontSize="11" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
+      <path d="M 600 175 L 600 200" fill="none" fillOpacity="0" stroke={UTILITY_BLUE} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-utility-arrow)`} />
+      <text x="623" y="195" fontSize="9" fontWeight="700" textAnchor="middle" fill={UTILITY_BLUE}>
         CWR
       </text>
-      <path d="M 790 760 L 870 760" fill="none" fillOpacity="0" stroke={STEAM} strokeWidth="1.8" markerEnd={`url(#${idPrefix}-steam-arrow)`} />
-      <IoBox x={872} y={745} width={56} label="Stm" small />
-      <path d="M 720 780 L 870 780" fill="none" fillOpacity="0" stroke={STEAM} strokeWidth="1.5" />
-      <IoBox x={872} y={771} width={56} label="Cond" small />
+      <path d="M 700 645 L 665 645" fill="none" fillOpacity="0" stroke={STEAM} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-steam-arrow)`} />
+      <text x="715" y="640" fontSize="9" fontWeight="700" textAnchor="middle" fill={STEAM}>
+        Stm
+      </text>
+      <path d="M 700 663 L 665 663" fill="none" fillOpacity="0" stroke={STEAM} strokeWidth="1.35" strokeDasharray="5 4" markerEnd={`url(#${idPrefix}-steam-arrow)`} />
+      <text x="717" y="670" fontSize="9" fontWeight="700" textAnchor="middle" fill={STEAM}>
+        Cond
+      </text>
     </g>
   );
 }
@@ -451,8 +461,10 @@ function BaseValve({ id, point }) {
     );
   }
 
+  const rotation = point.orientation === "vertical" ? "rotate(90)" : "";
+
   return (
-    <g transform={`translate(${point.x} ${point.y})`} opacity="0.82">
+    <g transform={`translate(${point.x} ${point.y}) ${rotation}`} opacity="0.82">
       <path d="M -12 -9 L 0 0 L -12 9 Z" fill="#ffffff" stroke={INK} strokeWidth="1.7" />
       <path d="M 12 -9 L 0 0 L 12 9 Z" fill="#ffffff" stroke={INK} strokeWidth="1.7" />
       <line x1="0" y1="0" x2="0" y2="-18" stroke={INK} strokeWidth="1.6" />
@@ -464,7 +476,6 @@ function LoopLayer({ loops, idPrefix }) {
   return (
     <g aria-label="control loop pairings">
       <SignalLayer loops={loops} />
-      <EquipmentOverlay />
       {loops.map((loop) => (
         <ValveCallout key={`valve-${loop.key}`} loop={loop} />
       ))}
@@ -478,84 +489,102 @@ function LoopLayer({ loops, idPrefix }) {
 function ProcessEquipment() {
   return (
     <>
-      <EquipmentBlock
-        x={270}
-        y={305}
-        width={130}
-        height={150}
-        label="Reactor"
-        sublabel="R-101"
-        ports={[
-          { x: 270, y: 330, side: "left" },
-          { x: 270, y: 365, side: "left" },
-          { x: 270, y: 400, side: "left" },
-          { x: 335, y: 305, side: "top" },
-          { x: 400, y: 430, side: "right" },
-        ]}
-      />
-      <EquipmentBlock
-        x={525}
-        y={173}
-        width={180}
-        height={60}
-        label="Condenser"
-        sublabel="E-101"
-        ports={[
-          { x: 525, y: 203, side: "left" },
-          { x: 705, y: 203, side: "right" },
-          { x: 615, y: 173, side: "top" },
-          { x: 665, y: 233, side: "bottom" },
-        ]}
-      />
-      <EquipmentBlock
-        x={850}
-        y={115}
-        width={130}
-        height={56}
-        label="Compressor"
-        sublabel="C-101"
-        ports={[
-          { x: 915, y: 171, side: "bottom" },
-          { x: 850, y: 143, side: "left" },
-          { x: 980, y: 143, side: "right" },
-        ]}
-        icon="compressor"
-      />
-      <EquipmentBlock
-        x={870}
-        y={320}
-        width={140}
-        height={125}
-        label="Vap/liq"
-        sublabel="Separator"
-        ports={[
-          { x: 870, y: 338, side: "left" },
-          { x: 940, y: 320, side: "top" },
-          { x: 940, y: 445, side: "bottom" },
-          { x: 1010, y: 370, side: "right" },
-          { x: 1010, y: 425, side: "right" },
-        ]}
-      />
-      <EquipmentBlock
-        x={590}
-        y={620}
-        width={130}
-        height={160}
-        label="Stripper"
-        sublabel="T-101"
-        ports={[
-          { x: 590, y: 620, side: "left" },
-          { x: 590, y: 735, side: "left" },
-          { x: 720, y: 650, side: "right" },
-          { x: 720, y: 780, side: "right" },
-          { x: 655, y: 780, side: "bottom" },
-        ]}
-        icon="column"
-      />
-      <AnalyzerBlock x={104} y={500} width={74} height={150} label="Feed analyzer" compounds={["XA", "XB", "XC", "XD", "XE", "XF"]} />
-      <AnalyzerBlock x={1164} y={300} width={70} height={170} label="Purge analyzer" compounds={["XA", "XB", "XC", "XD", "XE", "XF", "XG", "XH"]} />
-      <AnalyzerBlock x={1164} y={610} width={70} height={150} label="Product analyzer" compounds={["XD", "XE", "XF", "XG", "XH"]} />
+      <g aria-label="Reactor">
+        <rect x="270" y="300" width="100" height="190" fill="#ffffff" stroke="none" />
+        <ellipse cx="320" cy="300" rx="50" ry="15" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <rect x="270" y="300" width="100" height="190" fill="none" stroke={INK} strokeWidth="1.8" />
+        <ellipse cx="320" cy="490" rx="50" ry="15" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <g stroke="#777" strokeWidth="0.9" fill="none">
+          {["345", "365", "385", "405", "425", "445"].map((coilY) => (
+            <path key={coilY} d={`M 285 ${coilY} Q 320 ${Number(coilY) - 10} 355 ${coilY}`} />
+          ))}
+        </g>
+        <EquipmentText x={320} y={523} label="Reactor" sublabel="R-101" />
+      </g>
+
+      <g aria-label="Condenser">
+        <rect x="450" y="135" width="200" height="40" rx="3" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <line x1="465" y1="148" x2="635" y2="148" stroke="#777" strokeWidth="0.9" />
+        <line x1="465" y1="162" x2="635" y2="162" stroke="#777" strokeWidth="0.9" />
+        <EquipmentText x={550} y={126} label="Condenser" sublabel="E-101" above />
+      </g>
+
+      <g aria-label="Compressor">
+        <polygon points="700,75 760,60 760,110 700,95" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <EquipmentText x={730} y={48} label="Compressor" sublabel="C-101" above />
+      </g>
+
+      <g aria-label="Vap/liquid separator">
+        <rect x="780" y="210" width="80" height="170" fill="#ffffff" stroke="none" />
+        <ellipse cx="820" cy="210" rx="40" ry="13" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <rect x="780" y="210" width="80" height="170" fill="none" stroke={INK} strokeWidth="1.8" />
+        <ellipse cx="820" cy="380" rx="40" ry="13" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <line x1="785" y1="335" x2="855" y2="335" stroke="#777" strokeWidth="0.8" strokeDasharray="3 2" />
+        <EquipmentText x={820} y={410} label="Vap/Liq" sublabel="Separator" />
+      </g>
+
+      <g aria-label="Stripper">
+        <rect x="510" y="500" width="60" height="160" fill="#ffffff" stroke="none" />
+        <ellipse cx="540" cy="500" rx="30" ry="11" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <rect x="510" y="500" width="60" height="160" fill="none" stroke={INK} strokeWidth="1.8" />
+        <ellipse cx="540" cy="660" rx="30" ry="11" fill="#ffffff" stroke={INK} strokeWidth="1.8" />
+        <g stroke="#777" strokeWidth="0.8">
+          {[525, 545, 565, 585, 605, 625].map((trayY) => (
+            <line key={trayY} x1="514" y1={trayY} x2="566" y2={trayY} />
+          ))}
+        </g>
+        <rect x="600" y="640" width="65" height="28" rx="3" fill="#ffffff" stroke={INK} strokeWidth="1.6" />
+        <line x1="608" y1="650" x2="657" y2="650" stroke="#777" strokeWidth="0.9" />
+        <line x1="608" y1="660" x2="657" y2="660" stroke="#777" strokeWidth="0.9" />
+        <EquipmentText x={540} y={690} label="Stripper" sublabel="T-101" />
+      </g>
+
+      <g aria-label="Pumps">
+        <circle cx="690" cy="395" r="13" fill="#ffffff" stroke={INK} strokeWidth="1.6" />
+        <text x="690" y="399" fontSize="9" fontWeight="800" textAnchor="middle" fill={INK}>
+          P
+        </text>
+        <circle cx="780" cy="700" r="13" fill="#ffffff" stroke={INK} strokeWidth="1.6" />
+        <text x="780" y="704" fontSize="9" fontWeight="800" textAnchor="middle" fill={INK}>
+          P
+        </text>
+      </g>
+
+      <AnalyzerBlock x={112} y={442} width={58} height={128} label="Feed analyzer" compounds={["XA", "XB", "XC", "XD", "XE", "XF"]} />
+      <AnalyzerBlock x={1080} y={178} width={54} height={168} label="Purge analyzer" compounds={["XA", "XB", "XC", "XD", "XE", "XF", "XG", "XH"]} />
+      <AnalyzerBlock x={1080} y={546} width={54} height={150} label="Product analyzer" compounds={["XD", "XE", "XF", "XG", "XH"]} />
     </>
+  );
+}
+
+function EquipmentText({ x, y, label, sublabel, above = false }) {
+  return (
+    <g>
+      <text
+        x={x}
+        y={y}
+        fontSize="13"
+        fontWeight="900"
+        fontFamily="Avenir Next Condensed, Avenir Next, sans-serif"
+        textAnchor="middle"
+        fill={INK}
+      >
+        {label}
+      </text>
+      {sublabel && (
+        <text
+          x={x}
+          y={above ? y + 15 : y + 15}
+          fontSize="9"
+          fontWeight="800"
+          fontFamily="Avenir Next, Segoe UI, sans-serif"
+          textAnchor="middle"
+          fill={MUTED_INK}
+        >
+          {sublabel}
+        </text>
+      )}
+    </g>
   );
 }
 
@@ -666,13 +695,7 @@ function AnalyzerBlock({ x, y, width, height, label, compounds }) {
 }
 
 function SignalLayer({ loops }) {
-  return (
-    <g opacity="0.98">
-      {loops.map((loop) => (
-        <ControlSignal key={`signal-${loop.key}`} loop={loop} />
-      ))}
-    </g>
-  );
+  return <g aria-label={`${loops.length} numbered MV CV loop badges`} />;
 }
 
 function EquipmentOverlay() {
@@ -685,24 +708,39 @@ function EquipmentOverlay() {
 
 function ControlSignal({ loop }) {
   const points = controlRoutePoints(loop);
+  const signalOpacity = loop.divergent ? 0.92 : 0.84;
 
   return (
-    <g opacity={loop.divergent ? "0.16" : "0.08"}>
+    <g>
       {points.slice(1).map((point, index) => {
         const previous = points[index];
         return (
-          <line
-            key={`${loop.key}-${index}`}
-            x1={previous.x}
-            y1={previous.y}
-            x2={point.x}
-            y2={point.y}
-            stroke={loop.color}
-            strokeWidth="1.35"
-            strokeDasharray="8 7"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
+          <g key={`${loop.key}-${index}`}>
+            <line
+              x1={previous.x}
+              y1={previous.y}
+              x2={point.x}
+              y2={point.y}
+              stroke="#ffffff"
+              strokeWidth="3.2"
+              strokeDasharray="4 5"
+              strokeLinecap="round"
+              opacity="0.68"
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={previous.x}
+              y1={previous.y}
+              x2={point.x}
+              y2={point.y}
+              stroke={loop.color}
+              strokeWidth="1.45"
+              strokeDasharray="4 5"
+              strokeLinecap="round"
+              opacity={signalOpacity}
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
         );
       })}
     </g>
@@ -713,33 +751,37 @@ function ValveCallout({ loop }) {
   const { x, y } = loop.valvePoint;
   const controller = loop.controllerPoint;
   const label = labelPosition({ x, y }, VALVE_LABEL_OFFSETS[loop.pairing.mv], DEFAULT_VALVE_LABEL);
-  const valveTop = y - VALVE_SIZE.height / 2;
+  const isVertical = loop.valve.orientation === "vertical";
+  const valveLeadY = y - (isVertical ? VALVE_SIZE.width / 2 : VALVE_SIZE.height / 2);
+  const valveRotation = isVertical ? "rotate(90)" : "";
 
   return (
     <g aria-label={`${loop.pairing.mv} manipulated variable for ${loop.displayName}`}>
       <title>{`${loop.pairing.mv} to ${loop.pairing.cv}: ${loop.displayName}`}</title>
       <path
-        d={`M ${controller.x} ${controller.y + CONTROLLER_RADIUS} L ${x} ${valveTop}`}
+        d={`M ${controller.x} ${controller.y + CONTROLLER_RADIUS} L ${x} ${valveLeadY}`}
         fill="none"
         stroke={loop.color}
         strokeWidth="1.35"
         strokeDasharray="5 4"
         strokeLinecap="round"
-        opacity="0.36"
+        opacity="0.72"
         vectorEffect="non-scaling-stroke"
       />
       <ControllerBubble loop={loop} x={controller.x} y={controller.y} />
-      <g transform={`translate(${x} ${y})`}>
-        <path d={`M ${-VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${-VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" stroke={loop.color} strokeWidth="1.8" />
-        <path d={`M ${VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" stroke={loop.color} strokeWidth="1.8" />
+      <g transform={`translate(${x} ${y}) ${valveRotation}`}>
+        <path d={`M ${-VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${-VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
+        <path d={`M ${VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
       </g>
-      <circle cx={x + 23} cy={y - 16} r="10" fill={loop.color} stroke="#ffffff" strokeWidth="1.5" />
-      <text x={x + 23} y={y - 12.5} fontSize="9" fontWeight="800" textAnchor="middle" fill="#ffffff">
+      <circle cx={x + 16} cy={y - 12} r="7" fill={loop.color} stroke="#ffffff" strokeWidth="1.1" />
+      <text x={x + 16} y={y - 9.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill="#ffffff">
         {loop.loopNumber}
       </text>
-      <TagLabel x={label.x} y={label.y} anchor={label.anchor} fontSize="11">
-        {loop.pairing.mv}
-      </TagLabel>
+      {loop.mvOccurrence === 0 && (
+        <TagLabel x={label.x} y={label.y} anchor={label.anchor} fontSize={9}>
+          {loop.pairing.mv}
+        </TagLabel>
+      )}
     </g>
   );
 }
@@ -747,12 +789,12 @@ function ValveCallout({ loop }) {
 function ControllerBubble({ loop, x, y }) {
   return (
     <g aria-label={`${controllerTag(loop)} controller for ${loop.pairing.mv}`}>
-      <circle cx={x} cy={y} r={CONTROLLER_RADIUS + 4} fill="#ffffff" opacity="0.9" />
-      <circle cx={x} cy={y} r={CONTROLLER_RADIUS} fill="#ffffff" stroke={loop.color} strokeWidth="3" />
-      <text x={x} y={y - 5} fontSize="10" fontWeight="900" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={INK}>
+      <circle cx={x} cy={y} r={CONTROLLER_RADIUS + 2} fill="#ffffff" opacity="0.74" />
+      <circle cx={x} cy={y} r={CONTROLLER_RADIUS} fill="#ffffff" fillOpacity="0.78" stroke={loop.color} strokeWidth="2.2" />
+      <text x={x} y={y - 3.5} fontSize="7.3" fontWeight="900" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={INK}>
         {controllerTag(loop)}
       </text>
-      <text x={x} y={y + 8} fontSize="8" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={MUTED_INK}>
+      <text x={x} y={y + 7} fontSize="6.2" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={MUTED_INK}>
         PID
       </text>
     </g>
@@ -766,30 +808,58 @@ function MeasurementCallout({ loop }) {
   return (
     <g aria-label={`${loop.pairing.cv} controlled variable for ${loop.displayName}`}>
       <title>{`${loop.pairing.mv} to ${loop.pairing.cv}: ${loop.displayName}`}</title>
-      <circle cx={x} cy={y} r="18" fill="#ffffff" opacity="0.9" />
-      <circle cx={x} cy={y} r="14" fill="#ffffff" stroke={loop.color} strokeWidth="2.6" />
-      <line x1={x - 7} y1={y} x2={x + 7} y2={y} stroke={loop.color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-      <circle cx={x + 16} cy={y - 13} r="9" fill={loop.color} stroke="#ffffff" strokeWidth="1.4" />
-      <text x={x + 16} y={y - 9.8} fontSize="8" fontWeight="800" textAnchor="middle" fill="#ffffff">
+      <circle cx={x} cy={y} r="13" fill="#ffffff" opacity="0.74" />
+      <circle cx={x} cy={y} r="10" fill="#ffffff" fillOpacity="0.78" stroke={loop.color} strokeWidth="2" />
+      <line x1={x - 5} y1={y} x2={x + 5} y2={y} stroke={loop.color} strokeWidth="1.7" vectorEffect="non-scaling-stroke" />
+      <circle cx={x + 12} cy={y - 10} r="7" fill={loop.color} stroke="#ffffff" strokeWidth="1.1" />
+      <text x={x + 12} y={y - 7.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill="#ffffff">
         {loop.loopNumber}
       </text>
-      <TagLabel x={label.x} y={label.y} anchor={label.anchor}>
-        {loop.pairing.cv}
-      </TagLabel>
+      {loop.cvOccurrence === 0 && (
+        <>
+          <LabelLeader from={{ x, y }} to={label} color={loop.color} />
+          <TagLabel x={label.x} y={label.y} anchor={label.anchor}>
+            {loop.pairing.cv}
+          </TagLabel>
+        </>
+      )}
     </g>
+  );
+}
+
+function LabelLeader({ from, to, color }) {
+  const labelSide = to.anchor === "end" ? -1 : to.anchor === "start" ? 1 : 0;
+  const x1 = from.x + labelSide * 11;
+  const x2 = labelSide === 0 ? to.x : to.x - labelSide * 6;
+  const y2 = labelSide === 0 ? to.y - 15 : to.y - 4;
+
+  return (
+    <line
+      x1={x1}
+      y1={from.y}
+      x2={x2}
+      y2={y2}
+      stroke={color}
+      strokeWidth="1.2"
+      strokeDasharray="3 3"
+      strokeLinecap="round"
+      opacity="0.82"
+      vectorEffect="non-scaling-stroke"
+    />
   );
 }
 
 function TagLabel({ x, y, anchor = "middle", fontSize = TAG_FONT_SIZE, children }) {
   const text = String(children || "");
-  const width = estimateTextWidth(text, fontSize);
-  const height = fontSize + 6;
+  const resolvedFontSize = Number(fontSize) || TAG_FONT_SIZE;
+  const width = estimateTextWidth(text, resolvedFontSize);
+  const height = resolvedFontSize + 6;
   const rectX = labelRectX(x, width, anchor);
 
   return (
     <g>
-      <rect x={rectX} y={y - fontSize - 3} width={width} height={height} rx="2" fill="#ffffff" opacity="0.92" />
-      <text x={x} y={y} fontSize={fontSize} fontWeight="800" fontFamily={TAG_FONT} textAnchor={anchor} fill={INK}>
+      <rect x={rectX} y={y - resolvedFontSize - 3} width={width} height={height} rx="2" fill="#ffffff" opacity="0.68" />
+      <text x={x} y={y} fontSize={resolvedFontSize} fontWeight="800" fontFamily={TAG_FONT} textAnchor={anchor} fill={INK}>
         {children}
       </text>
     </g>
@@ -799,7 +869,7 @@ function TagLabel({ x, y, anchor = "middle", fontSize = TAG_FONT_SIZE, children 
 function Legend({ x, y }) {
   return (
     <g transform={`translate(${x} ${y})`} aria-label="legend">
-      <rect x="0" y="-28" width="386" height="54" rx="4" fill="#ffffff" stroke={RULE} strokeWidth="1.2" />
+      <rect x="0" y="-28" width="430" height="54" rx="4" fill="#ffffff" stroke={RULE} strokeWidth="1.2" />
       <text x="14" y="-8" fontSize="12" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" fill={INK}>
         Legend
       </text>
@@ -811,9 +881,12 @@ function Legend({ x, y }) {
       <text x="312" y="-8" fontSize="12" fontFamily="Avenir Next, Segoe UI, sans-serif" fill={INK}>
         oxblood = diverged
       </text>
-      <line x1="84" y1="11" x2="130" y2="11" stroke={SIGNAL} strokeWidth="2" strokeDasharray="8 7" strokeLinecap="round" />
+      <circle cx="107" cy="11" r="7" fill={MATCHED_COLOR} />
+      <text x="107" y="14" fontSize="6.5" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill="#ffffff">
+        01
+      </text>
       <text x="142" y="15" fontSize="11" fontFamily="Avenir Next, Segoe UI, sans-serif" fill={MUTED_INK}>
-        dashed signal links same-number MV and CV badges
+        same number marks paired MV and CV endpoints
       </text>
     </g>
   );
@@ -871,6 +944,10 @@ function describeLoops(pairings, highlightDivergent) {
       color,
       displayName,
       loopNumber: String(loop.index + 1).padStart(2, "0"),
+      mvOccurrence,
+      mvCount: mvCounts.get(loop.pairing.mv),
+      cvOccurrence,
+      cvCount: cvCounts.get(loop.pairing.cv),
       valvePoint,
       measurementPoint,
       controllerPoint: controllerPosition(valvePoint, loop.pairing.mv),
@@ -894,10 +971,10 @@ function spreadPoint(point, occurrence = 0, count = 1, type = "measurement") {
   }
 
   const offset = occurrence - (count - 1) / 2;
-  const distance = type === "valve" ? 52 : 46;
+  const distance = type === "valve" ? 58 : 40;
   return {
     x: point.x + offset * distance,
-    y: point.y + (type === "valve" ? offset * 10 : -Math.abs(offset) * 6),
+    y: point.y + (type === "valve" ? offset * 8 : -Math.abs(offset) * 5),
   };
 }
 
@@ -911,13 +988,13 @@ function labelPosition(point, offset, fallback) {
 }
 
 function controllerPosition(point, id) {
-  const minControllerY = 72;
+  const minControllerY = 18;
   const preferredY = point.y - VALVE_RADIUS - CONTROLLER_TO_VALVE_GAP - CONTROLLER_RADIUS;
   const offset = CONTROLLER_OFFSETS[id] || { dx: 0, dy: 0 };
 
   return {
     x: clamp(point.x + offset.dx, 36, PID_CANVAS.width - 36),
-    y: clamp(preferredY + offset.dy, minControllerY, PID_CANVAS.height - 92),
+    y: clamp(preferredY + offset.dy, minControllerY, PID_CANVAS.height - PROCESS_ORIGIN_Y - 44),
   };
 }
 

@@ -437,14 +437,12 @@ button {
 
 .pid-stage-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(1320px, 1fr));
-  gap: 18px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
 }
 
 .pid-panel {
-  min-width: 1320px;
+  min-width: 0;
 }
 
 .pid-stage-head {
@@ -465,16 +463,15 @@ button {
 }
 
 .pid-scroll {
-  max-height: min(78vh, 900px);
-  overflow: auto;
   border: 1px solid var(--line);
   background: #ffffff;
+  overflow: hidden;
 }
 
 .pid-scroll svg {
   display: block;
   width: 100%;
-  min-width: 1320px;
+  min-width: 0;
   height: auto;
 }
 
@@ -649,12 +646,6 @@ button {
   49%,
   100% {
     opacity: 0;
-  }
-}
-
-@media (max-width: 1500px) {
-  .pid-stage-grid {
-    grid-template-columns: minmax(1320px, 1fr);
   }
 }
 
