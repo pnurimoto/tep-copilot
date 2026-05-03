@@ -913,11 +913,11 @@ function ValveCallout({ loop }) {
     <g aria-label={`${loop.pairing.mv} manipulated variable for ${loop.displayName}`}>
       <title>{`${loop.pairing.mv} to ${loop.pairing.cv}: ${loop.displayName}`}</title>
       <g transform={`translate(${x} ${y}) ${valveRotation}`}>
-        <path d={`M ${-VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${-VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
-        <path d={`M ${VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
+        <path d={`M ${-VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${-VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="none" stroke={loop.color} strokeWidth="1.5" />
+        <path d={`M ${VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="none" stroke={loop.color} strokeWidth="1.5" />
       </g>
-      <circle cx={x + 16} cy={y - 12} r="7" fill={loop.color} stroke="#ffffff" strokeWidth="1.1" />
-      <text x={x + 16} y={y - 9.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill="#ffffff">
+      <circle cx={x + 16} cy={y - 12} r="7" fill="none" stroke={loop.color} strokeWidth="1.1" />
+      <text x={x + 16} y={y - 9.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill={loop.color}>
         {loop.loopNumber}
       </text>
       {loop.mvOccurrence === 0 && (
@@ -936,11 +936,10 @@ function MeasurementCallout({ loop }) {
   return (
     <g aria-label={`${loop.pairing.cv} controlled variable for ${loop.displayName}`}>
       <title>{`${loop.pairing.mv} to ${loop.pairing.cv}: ${loop.displayName}`}</title>
-      <circle cx={x} cy={y} r="13" fill="#ffffff" opacity="0.74" />
-      <circle cx={x} cy={y} r="10" fill="#ffffff" fillOpacity="0.78" stroke={loop.color} strokeWidth="2" />
+      <circle cx={x} cy={y} r="10" fill="none" stroke={loop.color} strokeWidth="2" />
       <line x1={x - 5} y1={y} x2={x + 5} y2={y} stroke={loop.color} strokeWidth="1.7" vectorEffect="non-scaling-stroke" />
-      <circle cx={x + 12} cy={y - 10} r="7" fill={loop.color} stroke="#ffffff" strokeWidth="1.1" />
-      <text x={x + 12} y={y - 7.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill="#ffffff">
+      <circle cx={x + 12} cy={y - 10} r="7" fill="none" stroke={loop.color} strokeWidth="1.1" />
+      <text x={x + 12} y={y - 7.6} fontSize="6.8" fontWeight="800" textAnchor="middle" fill={loop.color}>
         {loop.loopNumber}
       </text>
       {loop.cvOccurrence === 0 && (
