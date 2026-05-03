@@ -272,6 +272,12 @@ button {
   object-fit: contain;
 }
 
+.about-flowsheet svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .about-flowsheet figcaption {
   margin-top: 10px;
   color: var(--muted);
