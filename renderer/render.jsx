@@ -24,9 +24,6 @@ const FLOW_SHEET = {
 const REFERENCE_PID_ASSET = "tep_pid_reference_trace.png";
 
 const VALVE_SIZE = { width: 20, height: 14 };
-const CONTROLLER_RADIUS = 15;
-const VALVE_RADIUS = 12;
-const CONTROLLER_TO_VALVE_GAP = 15;
 const TAG_FONT = "Avenir Next, Segoe UI, sans-serif";
 const TAG_FONT_SIZE = 9;
 
@@ -58,17 +55,6 @@ const MEASUREMENT_LABEL_OFFSETS = {
   "XMEAS(38)": { dx: -29, dy: 4, anchor: "end" },
   "XMEAS(40)": { dx: -29, dy: 4, anchor: "end" },
 };
-const CONTROLLER_OFFSETS = {
-  "XMV(1)": { dx: -18, dy: 0 },
-  "XMV(2)": { dx: 18, dy: 0 },
-  "XMV(6)": { dx: 0, dy: -18 },
-  "XMV(8)": { dx: 0, dy: -4 },
-  "XMV(9)": { dx: 28, dy: 0 },
-  "XMV(10)": { dx: -26, dy: 0 },
-  "XMV(11)": { dx: 28, dy: -4 },
-  "XMV(12)": { dx: 36, dy: 0 },
-};
-
 const CONTROL_POINTS = {
   valves: {
     "XMV(1)": { x: 215, y: 322, label: "D feed valve", orientation: "horizontal" },
@@ -695,7 +681,13 @@ function AnalyzerBlock({ x, y, width, height, label, compounds }) {
 }
 
 function SignalLayer({ loops }) {
-  return <g aria-label={`${loops.length} numbered MV CV loop badges`} />;
+  return (
+    <g aria-label="instrument lines from XMEAS controlled variables to paired XMV valves">
+      {loops.map((loop) => (
+        <ControlSignal key={`signal-${loop.key}`} loop={loop} />
+      ))}
+    </g>
+  );
 }
 
 function EquipmentOverlay() {
@@ -708,7 +700,7 @@ function EquipmentOverlay() {
 
 function ControlSignal({ loop }) {
   const points = controlRoutePoints(loop);
-  const signalOpacity = loop.divergent ? 0.92 : 0.84;
+  const signalOpacity = loop.divergent ? 1 : 0.96;
 
   return (
     <g>
@@ -725,7 +717,7 @@ function ControlSignal({ loop }) {
               strokeWidth="3.2"
               strokeDasharray="4 5"
               strokeLinecap="round"
-              opacity="0.68"
+              opacity="0.82"
               vectorEffect="non-scaling-stroke"
             />
             <line
@@ -749,26 +741,13 @@ function ControlSignal({ loop }) {
 
 function ValveCallout({ loop }) {
   const { x, y } = loop.valvePoint;
-  const controller = loop.controllerPoint;
   const label = labelPosition({ x, y }, VALVE_LABEL_OFFSETS[loop.pairing.mv], DEFAULT_VALVE_LABEL);
   const isVertical = loop.valve.orientation === "vertical";
-  const valveLeadY = y - (isVertical ? VALVE_SIZE.width / 2 : VALVE_SIZE.height / 2);
   const valveRotation = isVertical ? "rotate(90)" : "";
 
   return (
     <g aria-label={`${loop.pairing.mv} manipulated variable for ${loop.displayName}`}>
       <title>{`${loop.pairing.mv} to ${loop.pairing.cv}: ${loop.displayName}`}</title>
-      <path
-        d={`M ${controller.x} ${controller.y + CONTROLLER_RADIUS} L ${x} ${valveLeadY}`}
-        fill="none"
-        stroke={loop.color}
-        strokeWidth="1.35"
-        strokeDasharray="5 4"
-        strokeLinecap="round"
-        opacity="0.72"
-        vectorEffect="non-scaling-stroke"
-      />
-      <ControllerBubble loop={loop} x={controller.x} y={controller.y} />
       <g transform={`translate(${x} ${y}) ${valveRotation}`}>
         <path d={`M ${-VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${-VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
         <path d={`M ${VALVE_SIZE.width / 2} ${-VALVE_SIZE.height / 2} L 0 0 L ${VALVE_SIZE.width / 2} ${VALVE_SIZE.height / 2} Z`} fill="#ffffff" fillOpacity="0.76" stroke={loop.color} strokeWidth="1.5" />
@@ -782,21 +761,6 @@ function ValveCallout({ loop }) {
           {loop.pairing.mv}
         </TagLabel>
       )}
-    </g>
-  );
-}
-
-function ControllerBubble({ loop, x, y }) {
-  return (
-    <g aria-label={`${controllerTag(loop)} controller for ${loop.pairing.mv}`}>
-      <circle cx={x} cy={y} r={CONTROLLER_RADIUS + 2} fill="#ffffff" opacity="0.74" />
-      <circle cx={x} cy={y} r={CONTROLLER_RADIUS} fill="#ffffff" fillOpacity="0.78" stroke={loop.color} strokeWidth="2.2" />
-      <text x={x} y={y - 3.5} fontSize="7.3" fontWeight="900" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={INK}>
-        {controllerTag(loop)}
-      </text>
-      <text x={x} y={y + 7} fontSize="6.2" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill={MUTED_INK}>
-        PID
-      </text>
     </g>
   );
 }
@@ -885,8 +849,9 @@ function Legend({ x, y }) {
       <text x="107" y="14" fontSize="6.5" fontWeight="800" fontFamily="Avenir Next, Segoe UI, sans-serif" textAnchor="middle" fill="#ffffff">
         01
       </text>
-      <text x="142" y="15" fontSize="11" fontFamily="Avenir Next, Segoe UI, sans-serif" fill={MUTED_INK}>
-        same number marks paired MV and CV endpoints
+      <line x1="142" y1="11" x2="188" y2="11" stroke={SIGNAL} strokeWidth="1.4" strokeDasharray="4 5" strokeLinecap="round" />
+      <text x="198" y="15" fontSize="11" fontFamily="Avenir Next, Segoe UI, sans-serif" fill={MUTED_INK}>
+        dashed instrument line connects XMEAS to XMV
       </text>
     </g>
   );
@@ -950,7 +915,6 @@ function describeLoops(pairings, highlightDivergent) {
       cvCount: cvCounts.get(loop.pairing.cv),
       valvePoint,
       measurementPoint,
-      controllerPoint: controllerPosition(valvePoint, loop.pairing.mv),
     };
   });
 }
@@ -987,38 +951,19 @@ function labelPosition(point, offset, fallback) {
   };
 }
 
-function controllerPosition(point, id) {
-  const minControllerY = 18;
-  const preferredY = point.y - VALVE_RADIUS - CONTROLLER_TO_VALVE_GAP - CONTROLLER_RADIUS;
-  const offset = CONTROLLER_OFFSETS[id] || { dx: 0, dy: 0 };
-
-  return {
-    x: clamp(point.x + offset.dx, 36, PID_CANVAS.width - 36),
-    y: clamp(preferredY + offset.dy, minControllerY, PID_CANVAS.height - PROCESS_ORIGIN_Y - 44),
-  };
-}
-
-function controlRoute(loop) {
-  return pointsToPath(controlRoutePoints(loop));
-}
-
 function controlRoutePoints(loop) {
   const route = SIGNAL_ROUTES[`${loop.pairing.mv}->${loop.pairing.cv}`];
   if (route) {
-    return orthogonalPoints(loop.measurementPoint, loop.controllerPoint, route);
+    return orthogonalPoints(loop.measurementPoint, loop.valvePoint, route);
   }
 
   const laneOffset = ((loop.index % 5) - 2) * 28;
-  const laneY = clamp(Math.max(loop.measurementPoint.y, loop.controllerPoint.y) + 58 + laneOffset, 92, PID_CANVAS.height - 92);
-  return orthogonalPoints(loop.measurementPoint, loop.controllerPoint, [
+  const laneY = clamp(Math.max(loop.measurementPoint.y, loop.valvePoint.y) + 58 + laneOffset, 92, PID_CANVAS.height - 92);
+  return orthogonalPoints(loop.measurementPoint, loop.valvePoint, [
     ["v", laneY],
     ["h", "cx"],
     ["v", "cy"],
   ]);
-}
-
-function orthogonalPath(start, end, route) {
-  return pointsToPath(orthogonalPoints(start, end, route));
 }
 
 function orthogonalPoints(start, end, route) {
@@ -1123,11 +1068,6 @@ function statusIsDivergent(status) {
 function loopDisplayName(pairing, index) {
   const name = pairing.loop_name || pairing.control_objective || `Loop ${pairing.loop || pairing.loop_id || index + 1}`;
   return truncate(name, 34);
-}
-
-function controllerTag(loop) {
-  const cvNumber = loop.pairing.cv.match(/\((\d+)\)/)?.[1] || loop.index + 1;
-  return `PIC-${cvNumber}`;
 }
 
 function countBy(items, keyFn) {

@@ -406,14 +406,17 @@ for (const [name, svg] of [
   ["ricker", rickerSvg],
   ["side-by-side", sideBySideSvg],
 ]) {
-  for (const expected of ["Reactor", "Separator", "Stripper", "PIC-", "green = matched", "oxblood = diverged"]) {
+  for (const expected of ["Reactor", "Separator", "Stripper", "dashed instrument line connects XMEAS to XMV", "green = matched", "oxblood = diverged"]) {
     if (!svg.includes(expected)) {
       throw new Error(`${name} P&ID SVG missing expected label: ${expected}`);
     }
   }
+  if (svg.includes("PIC-")) {
+    throw new Error(`${name} P&ID SVG should not render synthetic PIC controller tags`);
+  }
 }
 
-for (const expected of ["XMV(8)", "XMEAS(15)", "Stripper level", "PIC-15"]) {
+for (const expected of ["XMV(8)", "XMEAS(15)", "Stripper level", "dashed instrument line connects XMEAS to XMV"]) {
   if (!rickerSvg.includes(expected)) {
     throw new Error(`Ricker P&ID SVG missing stripper level loop detail: ${expected}`);
   }
