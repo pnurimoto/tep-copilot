@@ -9,7 +9,9 @@ import { renderPID } from "../renderer/render.jsx";
 import {
   REPLAY_PHASES,
   REPLAY_TOTAL_MS,
+  buildReplaySnapshotAt,
   createInitialReplayState,
+  phaseCheckpointMs,
   replayReducer,
   runReplay,
 } from "./timing.js";
@@ -42,6 +44,21 @@ export default function App() {
     });
   }
 
+  function handleJumpToPhase(phaseId) {
+    runnerRef.current?.cancel();
+    const checkpointMs = phaseCheckpointMs(phaseId);
+    setReplay(
+      buildReplaySnapshotAt({
+        elapsedMs: checkpointMs,
+        phaseId,
+        promptText,
+        pairings,
+        comparisonDetails: comparison.details,
+      })
+    );
+    setElapsedMs(Math.min(checkpointMs + 1, REPLAY_TOTAL_MS));
+  }
+
   const isRunning = replay.status === "running";
   const progressPct = Math.min(100, (elapsedMs / REPLAY_TOTAL_MS) * 100);
 
@@ -56,7 +73,7 @@ export default function App() {
           <span className="recorded-label">Recorded Run</span>
           <button className="run-button" type="button" onClick={handleRun} disabled={isRunning}>
             <span className="play-mark" aria-hidden="true" />
-            {isRunning ? "Running" : replay.completed ? "Replay Again" : "Run Agent"}
+            {isRunning ? "Running" : replay.completed || elapsedMs > 0 ? "Replay Again" : "Run Agent"}
           </button>
         </div>
       </header>
@@ -74,6 +91,7 @@ export default function App() {
                 phase={phase}
                 index={index}
                 status={phaseStatus(REPLAY_PHASES, replay, phase.id)}
+                onJump={handleJumpToPhase}
               />
             ))}
           </div>
@@ -314,12 +332,18 @@ function ReferencesFooter() {
   );
 }
 
-function PhaseStep({ phase, index, status }) {
+function PhaseStep({ phase, index, status, onJump }) {
   return (
-    <div className={`phase-step ${status}`}>
+    <button
+      className={`phase-step ${status}`}
+      type="button"
+      onClick={() => onJump(phase.id)}
+      aria-label={`Jump to ${phase.label}`}
+      aria-current={status === "active" ? "step" : undefined}
+    >
       <span>{String(index + 1).padStart(2, "0")}</span>
       <b>{phase.label}</b>
-    </div>
+    </button>
   );
 }
 

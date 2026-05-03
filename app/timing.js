@@ -120,6 +120,48 @@ export function phaseStarts(phases = REPLAY_PHASES) {
   }, {});
 }
 
+export function phaseCheckpointMs(phaseId, phases = REPLAY_PHASES) {
+  const starts = phaseStarts(phases);
+  const phase = phases.find((item) => item.id === phaseId);
+
+  if (!phase || starts[phaseId] === undefined) {
+    return 0;
+  }
+
+  return Math.max(0, starts[phaseId] + phase.durationMs - 1);
+}
+
+export function buildReplaySnapshotAt({
+  elapsedMs = 0,
+  promptText = "",
+  pairings = [],
+  comparisonDetails = [],
+  phaseId = null,
+  phases = REPLAY_PHASES,
+} = {}) {
+  const schedule = buildReplaySchedule({
+    promptText,
+    pairings,
+    comparisonDetails,
+    phases,
+  });
+
+  let state = createInitialReplayState();
+  for (const event of schedule) {
+    if (event.at > elapsedMs) {
+      break;
+    }
+    state = replayReducer(state, event);
+  }
+
+  return {
+    ...state,
+    status: "paused",
+    phaseId: phaseId || state.phaseId,
+    completed: false,
+  };
+}
+
 export function buildReplaySchedule({
   promptText = "",
   pairings = [],
