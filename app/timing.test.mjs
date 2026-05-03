@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import {
   REPLAY_PHASES,
   REPLAY_TOTAL_MS,
+  buildReplaySnapshotAt,
   buildReplaySchedule,
   createInitialReplayState,
+  phaseCheckpointMs,
   replayReducer,
 } from "./timing.js";
 
@@ -46,5 +48,35 @@ for (const event of schedule.filter((item) => item.at <= 36000)) {
 assert.equal(state.visiblePairingCount, 11);
 assert.ok(Object.keys(state.pairingReasoning).length > 0);
 assert.ok(Object.keys(state.checkedStatuses).length >= 1);
+
+const promptCheckpoint = phaseCheckpointMs("prompt");
+assert.equal(promptCheckpoint, 14999);
+
+const pairingSnapshot = buildReplaySnapshotAt({
+  elapsedMs: phaseCheckpointMs("pairings"),
+  phaseId: "pairings",
+  promptText: "one two three four five six",
+  pairings,
+  comparisonDetails,
+});
+
+assert.equal(pairingSnapshot.status, "paused");
+assert.equal(pairingSnapshot.phaseId, "pairings");
+assert.equal(pairingSnapshot.visiblePairingCount, 11);
+assert.ok(pairingSnapshot.promptText.includes("six"));
+assert.equal(Object.keys(pairingSnapshot.checkedStatuses).length, 0);
+
+const pidSnapshot = buildReplaySnapshotAt({
+  elapsedMs: phaseCheckpointMs("pid"),
+  phaseId: "pid",
+  promptText: "one two three four five six",
+  pairings,
+  comparisonDetails,
+});
+
+assert.equal(pidSnapshot.phaseId, "pid");
+assert.equal(pidSnapshot.pidsVisible, true);
+assert.equal(pidSnapshot.roadmapVisible, true);
+assert.equal(pidSnapshot.completed, false);
 
 console.log("Sprint 2.4 timing contract test passed");

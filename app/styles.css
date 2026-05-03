@@ -170,13 +170,33 @@ button {
   min-height: 54px;
   padding: 9px 10px;
   border-right: 1px solid var(--line);
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  appearance: none;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
   transition:
     background 220ms ease,
-    color 220ms ease;
+    color 220ms ease,
+    box-shadow 180ms ease;
 }
 
 .phase-step:last-child {
   border-right: 0;
+}
+
+.phase-step:hover {
+  background: rgba(167, 122, 37, 0.13);
+}
+
+.phase-step:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
 }
 
 .phase-step b {
