@@ -26,6 +26,9 @@ const REFERENCE_PID_ASSET = "tep_pid_reference_trace.png";
 const VALVE_SIZE = { width: 20, height: 14 };
 const TAG_FONT = "Avenir Next, Segoe UI, sans-serif";
 const TAG_FONT_SIZE = 9;
+const SIGNAL_LANE_SPACING = 8;
+const SIGNAL_OVERLAP_MIN = 6;
+const SIGNAL_EPSILON = 0.001;
 
 const DEFAULT_VALVE_LABEL = { dx: 0, dy: 29, anchor: "middle" };
 const DEFAULT_MEASUREMENT_LABEL = { dx: 24, dy: 4, anchor: "start" };
@@ -681,10 +684,12 @@ function AnalyzerBlock({ x, y, width, height, label, compounds }) {
 }
 
 function SignalLayer({ loops }) {
+  const routes = layoutSignalRoutes(loops);
+
   return (
     <g aria-label="instrument lines from XMEAS controlled variables to paired XMV valves">
-      {loops.map((loop) => (
-        <ControlSignal key={`signal-${loop.key}`} loop={loop} />
+      {routes.map(({ loop, points }) => (
+        <ControlSignal key={`signal-${loop.key}`} loop={loop} points={points} />
       ))}
     </g>
   );
@@ -698,8 +703,7 @@ function EquipmentOverlay() {
   );
 }
 
-function ControlSignal({ loop }) {
-  const points = controlRoutePoints(loop);
+function ControlSignal({ loop, points }) {
   const signalOpacity = loop.divergent ? 1 : 0.96;
 
   return (
@@ -737,6 +741,166 @@ function ControlSignal({ loop }) {
       })}
     </g>
   );
+}
+
+function layoutSignalRoutes(loops) {
+  const routes = loops.map((loop) => ({
+    loop,
+    points: controlRoutePoints(loop),
+  }));
+  const offsets = signalSegmentOffsets(routes);
+
+  return routes.map((route, routeIndex) => ({
+    ...route,
+    points: applySignalSegmentOffsets(route.points, routeIndex, offsets),
+  }));
+}
+
+function signalSegmentOffsets(routes) {
+  const segments = [];
+
+  routes.forEach((route, routeIndex) => {
+    route.points.slice(1).forEach((point, pointIndex) => {
+      const previous = route.points[pointIndex];
+      const segment = describeSignalSegment(previous, point, routeIndex, pointIndex);
+      if (segment) {
+        segments.push(segment);
+      }
+    });
+  });
+
+  const offsets = new Map();
+  for (const group of overlappingSignalGroups(segments)) {
+    const ordered = [...group].sort((a, b) => a.routeIndex - b.routeIndex || a.segmentIndex - b.segmentIndex);
+    ordered.forEach((segment, index) => {
+      offsets.set(segment.key, (index - (ordered.length - 1) / 2) * SIGNAL_LANE_SPACING);
+    });
+  }
+
+  return offsets;
+}
+
+function describeSignalSegment(start, end, routeIndex, segmentIndex) {
+  if (sameCoordinate(start.x, end.x) && !sameCoordinate(start.y, end.y)) {
+    return {
+      key: signalSegmentKey(routeIndex, segmentIndex),
+      orientation: "vertical",
+      fixed: start.x,
+      min: Math.min(start.y, end.y),
+      max: Math.max(start.y, end.y),
+      routeIndex,
+      segmentIndex,
+    };
+  }
+
+  if (sameCoordinate(start.y, end.y) && !sameCoordinate(start.x, end.x)) {
+    return {
+      key: signalSegmentKey(routeIndex, segmentIndex),
+      orientation: "horizontal",
+      fixed: start.y,
+      min: Math.min(start.x, end.x),
+      max: Math.max(start.x, end.x),
+      routeIndex,
+      segmentIndex,
+    };
+  }
+
+  return null;
+}
+
+function overlappingSignalGroups(segments) {
+  const visited = new Set();
+  const groups = [];
+
+  segments.forEach((segment) => {
+    if (visited.has(segment.key)) {
+      return;
+    }
+
+    const stack = [segment];
+    const group = [];
+    visited.add(segment.key);
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      group.push(current);
+
+      segments.forEach((candidate) => {
+        if (!visited.has(candidate.key) && signalSegmentsOverlap(current, candidate)) {
+          visited.add(candidate.key);
+          stack.push(candidate);
+        }
+      });
+    }
+
+    if (group.length > 1) {
+      groups.push(group);
+    }
+  });
+
+  return groups;
+}
+
+function signalSegmentsOverlap(a, b) {
+  if (a.orientation !== b.orientation || !sameCoordinate(a.fixed, b.fixed)) {
+    return false;
+  }
+
+  return Math.min(a.max, b.max) - Math.max(a.min, b.min) >= SIGNAL_OVERLAP_MIN;
+}
+
+function applySignalSegmentOffsets(points, routeIndex, offsets) {
+  if (points.length <= 1) {
+    return points;
+  }
+
+  const shiftedLines = points.slice(1).map((point, pointIndex) => {
+    const previous = points[pointIndex];
+    const segment = describeSignalSegment(previous, point, routeIndex, pointIndex);
+    const offset = segment ? offsets.get(segment.key) || 0 : 0;
+    return segment ? { ...segment, fixed: segment.fixed + offset } : null;
+  });
+  const shifted = [points[0]];
+
+  shiftedLines.forEach((line, index) => {
+    if (!line) {
+      shifted.push(points[index + 1]);
+      return;
+    }
+
+    const previousLine = shiftedLines[index - 1];
+    const nextLine = shiftedLines[index + 1];
+    const start =
+      previousLine && line
+        ? signalLineIntersection(previousLine, line, points[index])
+        : projectSignalEndpoint(points[index], line);
+    const end =
+      nextLine && line
+        ? signalLineIntersection(line, nextLine, points[index + 1])
+        : projectSignalEndpoint(points[index + 1], line);
+
+    shifted.push(start);
+    shifted.push(end);
+  });
+  shifted.push(points[points.length - 1]);
+
+  return dedupeAdjacentPoints(shifted);
+}
+
+function signalLineIntersection(a, b, fallback) {
+  if (a.orientation === "vertical" && b.orientation === "horizontal") {
+    return { x: a.fixed, y: b.fixed };
+  }
+
+  if (a.orientation === "horizontal" && b.orientation === "vertical") {
+    return { x: b.fixed, y: a.fixed };
+  }
+
+  return fallback;
+}
+
+function projectSignalEndpoint(point, line) {
+  return line.orientation === "vertical" ? { x: line.fixed, y: point.y } : { x: point.x, y: line.fixed };
 }
 
 function ValveCallout({ loop }) {
@@ -1008,6 +1172,14 @@ function dedupeAdjacentPoints(points) {
     const previous = points[index - 1];
     return !previous || previous.x !== point.x || previous.y !== point.y;
   });
+}
+
+function signalSegmentKey(routeIndex, segmentIndex) {
+  return `${routeIndex}:${segmentIndex}`;
+}
+
+function sameCoordinate(a, b) {
+  return Math.abs(a - b) <= SIGNAL_EPSILON;
 }
 
 function pointsToPath(points) {
