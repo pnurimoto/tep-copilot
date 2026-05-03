@@ -3,8 +3,10 @@ import agentRun from "../data/agent_run.json";
 import comparison from "../data/comparison.json";
 import rickerBaseline from "../data/ricker_baseline.json";
 import verifierReport from "../data/verifier_report.json";
+import variables from "../data/variables.json";
 import promptText from "../data/proposer_prompt_v1.txt?raw";
 import references from "../references/sources.json";
+import tepFlowsheet from "../assets/tep_flowsheet.svg";
 import { renderPID } from "../renderer/render.jsx";
 import {
   REPLAY_PHASES,
@@ -23,11 +25,34 @@ const SUMMARY_LABELS = {
   agreement_pct: "Agreement",
 };
 
+const ABOUT_FLOW = [
+  {
+    label: "Propose",
+    text: "A recorded LLM run emits MV/CV pairings with explicit reasoning from local TEP context.",
+  },
+  {
+    label: "Verify",
+    text: "Deterministic checks flag duplicate MVs, inventory-loop issues, degree-of-freedom gaps, and mass-balance concerns.",
+  },
+  {
+    label: "Compare",
+    text: "The proposal is placed beside the Ricker baseline so an engineer can inspect agreement, divergence, and novel choices.",
+  },
+];
+
 export default function App() {
   const pairings = useMemo(() => enrichPairings(agentRun.pairings, comparison.details), []);
+  const [activePage, setActivePage] = useState(getPageFromHash);
   const [replay, setReplay] = useState(createInitialReplayState());
   const [elapsedMs, setElapsedMs] = useState(0);
   const runnerRef = useRef(null);
+
+  useEffect(() => {
+    const handleHashChange = () => setActivePage(getPageFromHash());
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   useEffect(() => {
     return () => runnerRef.current?.cancel();
@@ -69,66 +94,165 @@ export default function App() {
           <div className="eyebrow">Tennessee Eastman Process</div>
           <h1>TEP Copilot</h1>
         </div>
+        <nav className="main-nav" aria-label="Primary">
+          <a className={activePage === "replay" ? "is-active" : ""} href="#/">
+            Replay
+          </a>
+          <a className={activePage === "about" ? "is-active" : ""} href="#/about">
+            About TEP
+          </a>
+        </nav>
         <div className="topbar-actions">
           <span className="recorded-label">Recorded Run</span>
-          <button className="run-button" type="button" onClick={handleRun} disabled={isRunning}>
-            <span className="play-mark" aria-hidden="true" />
-            {isRunning ? "Running" : replay.completed || elapsedMs > 0 ? "Replay Again" : "Run Agent"}
-          </button>
+          {activePage === "replay" ? (
+            <button className="run-button" type="button" onClick={handleRun} disabled={isRunning}>
+              <span className="play-mark" aria-hidden="true" />
+              {isRunning ? "Running" : replay.completed || elapsedMs > 0 ? "Replay Again" : "Run Agent"}
+            </button>
+          ) : (
+            <a className="run-button" href="#/">
+              <span className="play-mark" aria-hidden="true" />
+              Open Replay
+            </a>
+          )}
         </div>
       </header>
 
-      <main className="workspace">
-        <section className="control-strip" aria-label="Replay status">
-          <div className="elapsed">
-            <span>{formatElapsed(elapsedMs)}</span>
-            <small>/ 1:00</small>
-          </div>
-          <div className="phase-track">
-            {REPLAY_PHASES.map((phase, index) => (
-              <PhaseStep
-                key={phase.id}
-                phase={phase}
-                index={index}
-                status={phaseStatus(REPLAY_PHASES, replay, phase.id)}
-                onJump={handleJumpToPhase}
-              />
-            ))}
-          </div>
-          <div className="progress-meter" aria-label="Replay progress">
-            <span style={{ width: `${progressPct}%` }} />
-          </div>
-        </section>
-
-        <section className="replay-grid">
-          <section className="primary-plane" aria-label="Agent and Ricker comparison workspace">
-            <div className="plane-heading">
-              <div>
-                <div className="section-kicker">Agent proposal</div>
-                <h2>Verifier-guided control structure replay</h2>
-              </div>
-              <SummaryStrip replay={replay} summary={comparison.summary} />
+      {activePage === "about" ? (
+        <AboutPage />
+      ) : (
+        <main className="workspace">
+          <section className="control-strip" aria-label="Replay status">
+            <div className="elapsed">
+              <span>{formatElapsed(elapsedMs)}</span>
+              <small>/ 1:00</small>
             </div>
-
-            {replay.pidsVisible ? (
-              <PIDStage pairings={pairings} />
-            ) : (
-              <PairingWorkspace replay={replay} pairings={pairings} />
-            )}
+            <div className="phase-track">
+              {REPLAY_PHASES.map((phase, index) => (
+                <PhaseStep
+                  key={phase.id}
+                  phase={phase}
+                  index={index}
+                  status={phaseStatus(REPLAY_PHASES, replay, phase.id)}
+                  onJump={handleJumpToPhase}
+                />
+              ))}
+            </div>
+            <div className="progress-meter" aria-label="Replay progress">
+              <span style={{ width: `${progressPct}%` }} />
+            </div>
           </section>
 
-          <aside className="side-console" aria-label="Recorded agent stream">
-            <ConsolePanel replay={replay} />
-            <PromptPanel prompt={replay.promptText} isActive={replay.phaseId === "prompt"} />
-            <VerifierPanel replay={replay} report={verifierReport.agent} />
-          </aside>
-        </section>
+          <section className="replay-grid">
+            <section className="primary-plane" aria-label="Agent and Ricker comparison workspace">
+              <div className="plane-heading">
+                <div>
+                  <div className="section-kicker">Agent proposal</div>
+                  <h2>Verifier-guided control structure replay</h2>
+                </div>
+                <SummaryStrip replay={replay} summary={comparison.summary} />
+              </div>
 
-        <RoadmapPanel visible={replay.roadmapVisible} />
-      </main>
+              {replay.pidsVisible ? (
+                <PIDStage pairings={pairings} />
+              ) : (
+                <PairingWorkspace replay={replay} pairings={pairings} />
+              )}
+            </section>
+
+            <aside className="side-console" aria-label="Recorded agent stream">
+              <ConsolePanel replay={replay} />
+              <PromptPanel prompt={replay.promptText} isActive={replay.phaseId === "prompt"} />
+              <VerifierPanel replay={replay} report={verifierReport.agent} />
+            </aside>
+          </section>
+
+          <RoadmapPanel visible={replay.roadmapVisible} />
+        </main>
+      )}
 
       <ReferencesFooter />
     </div>
+  );
+}
+
+function AboutPage() {
+  const aboutMetrics = [
+    { value: variables.measurements.length, label: "measured variables" },
+    { value: variables.manipulated.length, label: "manipulated variables" },
+    { value: agentRun.pairings.length, label: "control loops reviewed" },
+  ];
+
+  return (
+    <main className="workspace about-workspace">
+      <section className="about-hero" aria-labelledby="about-title">
+        <div className="about-copy">
+          <div className="section-kicker">About the benchmark</div>
+          <h2 id="about-title">A control-room review desk for the Tennessee Eastman Process</h2>
+          <p>
+            The Tennessee Eastman Process is a published plant-wide process-control benchmark built around a
+            simulated chemical plant with feeds, reaction, separation, recycle, product handling, and operating
+            constraints. It is useful because control-loop choices have to respect process structure, safety
+            variables, inventory movement, and product-composition goals at the same time.
+          </p>
+          <p>
+            This web app turns that benchmark into a recorded engineering review. It shows one agent-proposed
+            decentralized control structure, checks it with deterministic rules, and compares the result against
+            the Ricker reference structure without claiming live optimization or closed-loop simulation.
+          </p>
+        </div>
+
+        <div className="about-process-panel" aria-label="TEP process summary">
+          <figure className="about-flowsheet">
+            <img src={tepFlowsheet} alt="Redrawn Tennessee Eastman Process flowsheet" />
+            <figcaption>Local redrawn process map used by the replay and documentation.</figcaption>
+          </figure>
+          <div className="about-unit-row" aria-label="Primary TEP units">
+            <span>Reactor</span>
+            <span>Separator</span>
+            <span>Stripper</span>
+            <span>Recycle</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="about-metrics" aria-label="TEP dimensions">
+        {aboutMetrics.map((metric) => (
+          <div className="about-metric" key={metric.label}>
+            <b>{metric.value}</b>
+            <span>{metric.label}</span>
+          </div>
+        ))}
+      </section>
+
+      <section className="about-purpose" aria-labelledby="purpose-title">
+        <div>
+          <div className="section-kicker">What the web app is for</div>
+          <h2 id="purpose-title">Make the control-structure argument inspectable</h2>
+        </div>
+        <div className="purpose-copy">
+          <p>
+            The app is designed for judges and controls reviewers who need to see the reasoning trail, not just a
+            final answer. The replay keeps the evidence local: prompt, proposed pairings, verifier results, and
+            baseline comparison all come from repository artifacts.
+          </p>
+          <p>
+            The practical output is a fast triage view: which loops match a known baseline, which choices need
+            engineering review, and where a future simulator-in-the-loop version should focus.
+          </p>
+        </div>
+      </section>
+
+      <section className="about-flow" aria-label="Application workflow">
+        {ABOUT_FLOW.map((step, index) => (
+          <article className="flow-step" key={step.label}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <h3>{step.label}</h3>
+            <p>{step.text}</p>
+          </article>
+        ))}
+      </section>
+    </main>
   );
 }
 
@@ -327,6 +451,17 @@ function ReferencesFooter() {
             {item.doi ? ` DOI ${item.doi}` : ""}
           </span>
         ))}
+        {references.hackathon ? (
+          <span className="hackathon-credit">
+            <b>{references.hackathon.event}</b>
+            <em>{references.hackathon.author}</em>
+            {references.hackathon.links?.map((link) => (
+              <a key={link.label} href={link.url} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            ))}
+          </span>
+        ) : null}
       </div>
     </footer>
   );
@@ -405,4 +540,8 @@ function formatElapsed(ms) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function getPageFromHash() {
+  return window.location.hash === "#/about" ? "about" : "replay";
 }

@@ -16,5 +16,19 @@
       "citation": "Ricker (1996), Decentralized control of the Tennessee Eastman Challenge Process, Journal of Process Control 6(4):205-221.",
       "doi": ""
     }
-  ]
+  ],
+  "hackathon": {
+    "event": "2026 IBM Bob Dev Day Hackathon",
+    "author": "2026 Paula Nurimoto",
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/pnurimoto/tep-copilot"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/paula-nurimoto/"
+      }
+    ]
+  }
 }
