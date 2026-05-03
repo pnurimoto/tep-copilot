@@ -429,6 +429,77 @@ if (!agentSvg.includes(MATCHED_COLOR)) {
   throw new Error("Agent P&ID did not render any matched loops in green");
 }
 
+function parseLineAttributes(tag) {
+  return Object.fromEntries([...tag.matchAll(/([a-z0-9-]+)="([^"]*)"/g)].map((match) => [match[1], match[2]]));
+}
+
+function coloredSignalSegments(svg) {
+  return [...svg.matchAll(/<line\b[^>]*>/g)]
+    .map((match) => match[0])
+    .filter(
+      (tag) =>
+        tag.includes('stroke-dasharray="4 5"') &&
+        (tag.includes(`stroke="${MATCHED_COLOR}"`) || tag.includes(`stroke="${DIVERGED_COLOR}"`))
+    )
+    .map(parseLineAttributes)
+    .map((attrs) => ({
+      x1: Number(attrs.x1),
+      y1: Number(attrs.y1),
+      x2: Number(attrs.x2),
+      y2: Number(attrs.y2),
+    }));
+}
+
+function nearlyEqual(a, b) {
+  return Math.abs(a - b) <= 0.001;
+}
+
+function overlapLength(aMin, aMax, bMin, bMax) {
+  return Math.min(aMax, bMax) - Math.max(aMin, bMin);
+}
+
+function assertNoSignalLineOverlaps(name, svg) {
+  const segments = coloredSignalSegments(svg);
+
+  for (let i = 0; i < segments.length; i += 1) {
+    for (let j = i + 1; j < segments.length; j += 1) {
+      const a = segments[i];
+      const b = segments[j];
+      const aVertical = nearlyEqual(a.x1, a.x2);
+      const bVertical = nearlyEqual(b.x1, b.x2);
+      const aHorizontal = nearlyEqual(a.y1, a.y2);
+      const bHorizontal = nearlyEqual(b.y1, b.y2);
+
+      if (aVertical && bVertical && nearlyEqual(a.x1, b.x1)) {
+        const length = overlapLength(
+          Math.min(a.y1, a.y2),
+          Math.max(a.y1, a.y2),
+          Math.min(b.y1, b.y2),
+          Math.max(b.y1, b.y2)
+        );
+        if (length >= 6) {
+          throw new Error(`${name} P&ID has overlapping vertical instrument lines at x=${a.x1}`);
+        }
+      }
+
+      if (aHorizontal && bHorizontal && nearlyEqual(a.y1, b.y1)) {
+        const length = overlapLength(
+          Math.min(a.x1, a.x2),
+          Math.max(a.x1, a.x2),
+          Math.min(b.x1, b.x2),
+          Math.max(b.x1, b.x2)
+        );
+        if (length >= 6) {
+          throw new Error(`${name} P&ID has overlapping horizontal instrument lines at y=${a.y1}`);
+        }
+      }
+    }
+  }
+}
+
+assertNoSignalLineOverlaps("Agent", agentSvg);
+assertNoSignalLineOverlaps("Ricker", rickerSvg);
+
 fs.writeFileSync("/private/tmp/tep-pid-agent.svg", agentSvg);
 fs.writeFileSync("/private/tmp/tep-pid-ricker.svg", rickerSvg);
 fs.writeFileSync("/private/tmp/tep-pid-side-by-side.svg", sideBySideSvg);
